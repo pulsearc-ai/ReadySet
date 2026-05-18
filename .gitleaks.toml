@@ -1,0 +1,9 @@
+title = "xtask gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Project-local allowlist; populate as needed."
+paths       = []
+regexes     = []

@@ -1,0 +1,37 @@
+[package]
+name         = "ready-set"
+version      = "0.1.0"
+edition.workspace      = true
+rust-version.workspace = true
+license.workspace      = true
+repository.workspace   = true
+description  = "ready, set, go: capability lifecycle orchestration for projects."
+keywords     = ["ready-set", "cli", "capabilities", "plugins"]
+categories   = ["command-line-utilities", "development-tools"]
+
+[[bin]]
+name = "ready-set"
+path = "src/main.rs"
+
+[dependencies]
+ready-set-sdk      = { workspace = true }
+anyhow             = { workspace = true }
+clap               = { workspace = true }
+directories        = { workspace = true }
+semver             = { workspace = true }
+serde              = { workspace = true }
+serde_json         = { workspace = true }
+sha2               = { workspace = true }
+time               = { workspace = true }
+toml               = { workspace = true }
+toml_edit          = { workspace = true }
+tracing            = { workspace = true }
+tracing-subscriber = { workspace = true }
+walkdir            = { workspace = true }
+which              = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+
+[lints]
+workspace = true

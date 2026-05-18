@@ -1,0 +1,34 @@
+ready, set, go: capability lifecycle orchestration for projects.
+
+USAGE:
+    ready-set [GLOBAL FLAGS] <SUBCOMMAND> [SUBCOMMAND ARGS...]
+
+BUILT-IN SUBCOMMANDS:
+    ready     Diagnose product capabilities and show the readiness matrix.
+    set       Configure or reconcile required product capabilities.
+    go        Execute provider-backed capability workflows.
+    help      Print this help.
+    version   Print the dispatcher version.
+    list      List built-in and discovered plugin subcommands.
+
+PLUGIN SUBCOMMANDS:
+    Any binary on PATH named `ready-set-<name>` is a plugin and can be invoked
+    as `ready-set <name>`. Discover installed plugins with `ready-set --list`.
+
+META FLAGS:
+    --help, -h          Print this help.
+    --version, -V       Print the dispatcher version.
+    --list              List built-in and discovered plugin subcommands.
+    --list --all        Include plugins that don't support the current OS.
+
+GLOBAL FLAGS (forwarded to subcommands via the env contract):
+    --quiet             Errors only (READY_SET_LOG=quiet).
+    --verbose           Debug logging (READY_SET_LOG=verbose).
+    --json              Machine-readable output (READY_SET_OUTPUT=json).
+    --color <when>      Color preference: auto (default), always, never.
+
+INSTALLING PLUGINS:
+    cargo install ready-set-<name>
+
+DOCS:
+    Contracts:  docs/contracts/  in the ready-set repository.

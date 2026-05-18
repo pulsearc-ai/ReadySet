@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ready-set.dev/schemas/describe.schema.json",
+  "title": "ready-set __describe output",
+  "description": "JSON object printed by `<plugin> __describe`. Same shape as the manifest sidecar.",
+  "$ref": "manifest.schema.json"
+}

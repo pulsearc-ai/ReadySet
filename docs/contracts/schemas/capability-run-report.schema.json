@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ready-set.dev/schemas/capability-run-report.schema.json",
+  "title": "ready-set capability run report",
+  "description": "Structured result from running a capability lifecycle verb.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "verb", "status", "actions"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "verb": {
+      "type": "string",
+      "enum": ["set", "go"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ok", "changed", "noop", "failed"]
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "summary"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["create", "modify", "delete", "run", "check", "skip", "error"]
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: "1"
+
+jobs:
+  test:
+    name: test (${{ matrix.os }}, ${{ matrix.toolchain }})
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.toolchain == 'beta' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        toolchain: [stable, beta]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.toolchain }}
+      - name: rustfmt
+        if: matrix.toolchain == 'stable'
+        run: cargo fmt --all -- --check
+      - name: clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: test
+        run: cargo test --workspace --locked
+      - name: doc
+        if: matrix.toolchain == 'stable'
+        run: cargo doc --workspace --no-deps
+        env:
+          RUSTDOCFLAGS: -D warnings
+
+  fixtures:
+    name: contract fixtures
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install -g ajv-cli ajv-formats
+      - name: validate manifest fixture
+        run: |
+          cat > /tmp/manifest-fixture.json <<'JSON'
+          {
+            "description": "Reference plugin",
+            "version": "0.1.0",
+            "stability": "stable",
+            "min_dispatcher_version": "0.1.0",
+            "platforms": ["linux", "macos", "windows"],
+            "requires_cargo_workspace": false
+          }
+          JSON
+          ajv validate --spec=draft2020 -s docs/contracts/schemas/manifest.schema.json -d /tmp/manifest-fixture.json
+      - name: validate change-record fixture
+        run: |
+          cat > /tmp/change-fixture.json <<'JSON'
+          {
+            "op": "create",
+            "path": "rust-toolchain.toml",
+            "before_sha256": null,
+            "after_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+            "ts": "2026-05-10T15:04:05Z"
+          }
+          JSON
+          ajv validate --spec=draft2020 -s docs/contracts/schemas/change-record.schema.json -d /tmp/change-fixture.json
+
+  deny:
+    name: cargo-deny
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@cargo-deny
+      - run: cargo deny --workspace check

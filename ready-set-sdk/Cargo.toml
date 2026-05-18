@@ -1,0 +1,35 @@
+[package]
+name         = "ready-set-sdk"
+version      = "0.1.0"
+edition.workspace      = true
+rust-version.workspace = true
+license.workspace      = true
+repository.workspace   = true
+description  = "Shared conventions and helpers for ready-set plugins."
+keywords     = ["ready-set", "cli", "plugin", "sdk"]
+categories   = ["development-tools"]
+
+[lib]
+name = "ready_set_sdk"
+path = "src/lib.rs"
+
+[dependencies]
+directories        = { workspace = true }
+is-terminal        = { workspace = true }
+semver             = { workspace = true }
+serde              = { workspace = true }
+serde_json         = { workspace = true }
+sha2               = { workspace = true }
+thiserror          = { workspace = true }
+time               = { workspace = true }
+toml               = { workspace = true }
+tracing            = { workspace = true }
+tracing-subscriber = { workspace = true }
+which              = { workspace = true }
+getrandom          = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+
+[lints]
+workspace = true

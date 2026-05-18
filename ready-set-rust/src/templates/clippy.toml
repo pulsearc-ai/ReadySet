@@ -1,0 +1,6 @@
+# See `[workspace.lints]` in Cargo.toml for the policy. This file holds
+# clippy *configuration* knobs (thresholds, allowed prefixes, etc.) rather
+# than lint levels.
+msrv                                = "1.95"
+avoid-breaking-exported-api         = false
+disallowed-names                    = ["foo", "bar", "baz", "qux"]

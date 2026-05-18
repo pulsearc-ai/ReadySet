@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ready-set.dev/schemas/manifest.schema.json",
+  "title": "ready-set plugin manifest",
+  "description": "TOML-decoded shape of a ready-set-<name>.toml sidecar.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "description",
+    "version",
+    "stability",
+    "min_dispatcher_version",
+    "platforms",
+    "requires_cargo_workspace",
+    "capabilities"
+  ],
+  "properties": {
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "pattern": "^[^\\r\\n]+$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(?:[-+][A-Za-z0-9.\\-]+)?$"
+    },
+    "stability": {
+      "type": "string",
+      "enum": ["stable", "experimental", "deprecated"]
+    },
+    "min_dispatcher_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(?:[-+][A-Za-z0-9.\\-]+)?$"
+    },
+    "platforms": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["linux", "macos", "windows"]
+      }
+    },
+    "requires_cargo_workspace": {
+      "type": "boolean"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "$ref": "capability-descriptor.schema.json"
+      }
+    }
+  }
+}

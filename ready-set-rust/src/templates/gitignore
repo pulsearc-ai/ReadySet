@@ -1,0 +1,17 @@
+/target/
+**/*.rs.bk
+*.pdb
+
+# macOS
+.DS_Store
+
+# JetBrains
+.idea/
+*.iml
+
+# VSCode
+.vscode/
+
+# Env
+.env
+.env.local

@@ -1,0 +1,69 @@
+name: Contracts
+
+# Path-filtered contract checks. Runs only when contract specs, the SDK, or
+# this workflow change.
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - docs/contracts/**
+      - ready-set-sdk/**
+      - .github/workflows/contracts-check.yml
+  pull_request:
+    paths:
+      - docs/contracts/**
+      - ready-set-sdk/**
+      - .github/workflows/contracts-check.yml
+
+jobs:
+  schemas:
+    name: schema + stability headers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install -g ajv-cli ajv-formats
+      - name: compile schemas
+        run: |
+          for schema in docs/contracts/schemas/*.schema.json; do
+            echo "compiling $schema"
+            ajv compile --spec=draft2020 -s "$schema"
+          done
+      - name: stability headers present
+        run: |
+          missing=()
+          for f in docs/contracts/*.md; do
+            base=$(basename "$f")
+            if [ "$base" = "README.md" ]; then
+              continue
+            fi
+            if ! grep -qE '^\| Stability ' "$f"; then
+              missing+=("$f")
+            fi
+          done
+          if [ ${#missing[@]} -gt 0 ]; then
+            printf 'spec without stability header: %s\n' "${missing[@]}"
+            exit 1
+          fi
+
+  sdk-public-api:
+    name: SDK public API
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@cargo-public-api
+      - name: check public API symbols
+        run: |
+          cargo public-api -p ready-set-sdk --simplified > /tmp/public-api.txt
+          for symbol in \
+            "pub struct ready_set_sdk::Context" \
+            "pub enum ready_set_sdk::ExitCode" \
+            "pub struct ready_set_sdk::Output" \
+            "pub mod ready_set_sdk::change_log"; do
+            grep -F "$symbol" /tmp/public-api.txt
+          done
