@@ -60,10 +60,14 @@ jobs:
             "stability": "stable",
             "min_dispatcher_version": "0.1.0",
             "platforms": ["linux", "macos", "windows"],
-            "requires_cargo_workspace": false
+            "requires_cargo_workspace": false,
+            "capabilities": []
           }
           JSON
-          ajv validate --spec=draft2020 -s docs/contracts/schemas/manifest.schema.json -d /tmp/manifest-fixture.json
+          ajv validate --spec=draft2020 \
+            -s docs/contracts/schemas/manifest.schema.json \
+            -r docs/contracts/schemas/capability-descriptor.schema.json \
+            -d /tmp/manifest-fixture.json
       - name: validate change-record fixture
         run: |
           cat > /tmp/change-fixture.json <<'JSON'

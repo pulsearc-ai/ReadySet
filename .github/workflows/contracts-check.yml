@@ -30,7 +30,13 @@ jobs:
         run: |
           for schema in docs/contracts/schemas/*.schema.json; do
             echo "compiling $schema"
-            ajv compile --spec=draft2020 -s "$schema"
+            refs=()
+            for ref in docs/contracts/schemas/*.schema.json; do
+              if [ "$ref" != "$schema" ]; then
+                refs+=("-r" "$ref")
+              fi
+            done
+            ajv compile --spec=draft2020 -s "$schema" "${refs[@]}"
           done
       - name: stability headers present
         run: |
@@ -56,7 +62,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
       - uses: Swatinem/rust-cache@v2
-      - uses: taiki-e/install-action@cargo-public-api
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-public-api
       - name: check public API symbols
         run: |
           cargo public-api -p ready-set-sdk --simplified > /tmp/public-api.txt

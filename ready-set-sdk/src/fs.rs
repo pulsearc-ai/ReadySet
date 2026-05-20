@@ -116,6 +116,7 @@ pub fn restrict_to_user(path: &Path) -> Result<()> {
 ///
 /// Always returns `Ok` on Windows; reserved for future ACL support.
 #[cfg(windows)]
+#[allow(clippy::missing_const_for_fn)]
 pub fn restrict_to_user(_path: &Path) -> Result<()> {
     Ok(())
 }
