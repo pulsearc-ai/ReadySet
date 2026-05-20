@@ -210,4 +210,5 @@ the published examples in `docs/contracts/`.
 
 ## License
 
-Licensed under either of MIT or Apache-2.0.
+Licensed under either of [MIT](../LICENSE-MIT) or
+[Apache-2.0](../LICENSE-APACHE), at your option.

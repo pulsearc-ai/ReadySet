@@ -945,5 +945,7 @@ For implementation decisions, prefer this README plus the contract docs.
 
 Licensed under either of:
 
-- MIT
-- Apache-2.0
+- [MIT](LICENSE-MIT)
+- [Apache-2.0](LICENSE-APACHE)
+
+at your option.

@@ -191,4 +191,5 @@ runs on all three platforms. Path handling uses `std::path::Path` /
 
 ## License
 
-Licensed under either of MIT or Apache-2.0.
+Licensed under either of [MIT](../LICENSE-MIT) or
+[Apache-2.0](../LICENSE-APACHE), at your option.
