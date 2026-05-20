@@ -1,12 +1,16 @@
 //! End-to-end tests for provider-backed lifecycle commands.
 
+#[cfg(unix)]
 use std::path::{Path, PathBuf};
+#[cfg(unix)]
 use std::process::Command;
 
+#[cfg(unix)]
 const fn dispatcher() -> &'static str {
     env!("CARGO_BIN_EXE_ready-set")
 }
 
+#[cfg(unix)]
 fn write(path: &Path, content: &str) {
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent).unwrap();

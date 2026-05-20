@@ -1,6 +1,8 @@
 //! End-to-end tests for the `ready-set-rust` provider plugin.
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
+#[cfg(unix)]
+use std::path::PathBuf;
 use std::process::Command;
 
 use ready_set_sdk::change_log::{ChangeOp, reverse_dir};
