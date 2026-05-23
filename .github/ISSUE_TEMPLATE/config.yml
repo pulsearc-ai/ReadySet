@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or discussion
+    url: https://github.com/pulsearc-ai/ReadySet/discussions
+    about: Open-ended questions, design ideas, or anything that isn't a concrete bug or feature request.
+  - name: Security report
+    url: https://github.com/pulsearc-ai/ReadySet/blob/main/SECURITY.md
+    about: Vulnerabilities should be reported privately per SECURITY.md, not as a public issue.
