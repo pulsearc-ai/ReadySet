@@ -1,5 +1,7 @@
 # ready-set-rust
 
+**ReadySet — by [PulseArc](https://github.com/pulsearc-ai).**
+
 The first-party `ready-set` provider for Rust workspace foundations.
 
 This crate ships the `ready-set-rust` binary, a provider plugin discovered

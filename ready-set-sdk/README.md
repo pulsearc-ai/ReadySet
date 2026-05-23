@@ -1,5 +1,7 @@
 # ready-set-sdk
 
+**ReadySet — by [PulseArc](https://github.com/pulsearc-ai).**
+
 Shared conventions and helpers for `ready-set` plugins.
 
 This crate is the typed Rust mirror of the contracts under

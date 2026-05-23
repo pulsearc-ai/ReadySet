@@ -1,5 +1,7 @@
 # ready-set
 
+**ReadySet — by [PulseArc](https://github.com/pulsearc-ai).**
+
 `ready-set` is a product-readiness CLI: a control surface that shows what a
 project has, what is missing, what is blocked, and what concrete action should
 happen next.

@@ -1,5 +1,7 @@
 # ready-set Contracts
 
+**ReadySet — by [PulseArc](https://github.com/pulsearc-ai).**
+
 This directory holds the long-term contracts that bind the `ready-set`
 ecosystem. Every plugin — first-party or third-party, written in Rust or any
 other language — depends on these surfaces. They are designed to be stable for

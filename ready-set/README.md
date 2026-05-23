@@ -1,5 +1,7 @@
 # ready-set
 
+**ReadySet — by [PulseArc](https://github.com/pulsearc-ai).**
+
 The core CLI and lifecycle dispatcher for the `ready-set` ecosystem.
 
 This crate ships the `ready-set` binary. It owns the dispatcher, the
