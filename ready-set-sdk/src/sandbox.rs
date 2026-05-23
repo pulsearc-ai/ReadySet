@@ -8,6 +8,7 @@ use crate::error::Result;
 
 /// Capability a plugin may declare to its sandbox.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[non_exhaustive]
 pub enum Capability {
     /// Read files within the project root.
     ReadProject,

@@ -1,13 +1,16 @@
 [package]
 name         = "ready-set"
-version      = "0.1.0"
+version      = "0.1.0-alpha.1"
 edition.workspace      = true
 rust-version.workspace = true
 license.workspace      = true
 repository.workspace   = true
-description  = "ready, set, go: capability lifecycle orchestration for projects."
-keywords     = ["ready-set", "cli", "capabilities", "plugins"]
-categories   = ["command-line-utilities", "development-tools"]
+description   = "ready, set, go: capability lifecycle orchestration for projects."
+documentation = "https://docs.rs/ready-set"
+homepage      = "https://github.com/pulsearc-ai/ready-set"
+readme        = "README.md"
+keywords      = ["ready-set", "cli", "capabilities", "plugins"]
+categories    = ["command-line-utilities", "development-tools"]
 
 [[bin]]
 name = "ready-set"

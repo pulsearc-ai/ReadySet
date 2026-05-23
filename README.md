@@ -800,17 +800,16 @@ documentation polish, the `undo` built-in, and the v0.1.0 acceptance gate.
 
 ### Remaining
 
-10. **Final compatibility and verification pass** — rename leftover
-    `go`-bootstrap module names where confusing; full test sweep on Linux,
-    macOS, Windows.
-11. **`undo` built-in** — reverses `.ready-set/changes/` records regardless
+10. **`undo` built-in** — reverses `.ready-set/changes/` records regardless
     of provider.
-12. **CI and release infrastructure** — pipeline + signed release binaries
+11. **CI and release infrastructure** — pipeline + signed release binaries
     on tag push.
 
 ### v0.1.0 acceptance gates
 
-All must hold before publishing:
+All must hold before publishing `0.1.0` (stable). Pre-release tags in the
+`0.1.0-alpha.*` / `0.1.0-beta.*` series may ship with subsets of these
+gates met; `undo` in particular lands in a later pre-release.
 
 - `ready-set ready` correctly classifies a fresh cargo workspace and the
   same workspace after `ready-set set` on Linux, macOS, and Windows.

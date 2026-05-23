@@ -26,6 +26,7 @@ fn locate_dispatcher() -> Result<std::path::PathBuf> {
 
 /// Outcome of a dispatched subcommand.
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum DispatchOutcome {
     /// stdout was streamed to the parent's stdout.
     Streamed {

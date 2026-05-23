@@ -1,6 +1,7 @@
 //! Capability lifecycle contract types.
 //!
-//! These are the typed Rust mirrors of `docs/contracts/capabilities.md`.
+//! Typed Rust mirrors of
+//! [`docs/contracts/capabilities.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/capabilities.md).
 
 use std::fmt;
 
@@ -109,6 +110,10 @@ pub enum CapabilityVerb {
 }
 
 /// Readiness state for a capability report.
+///
+/// Variants are pinned by `docs/contracts/capabilities.md` (version 1).
+/// Adding a state is a contract bump, so the enum is intentionally
+/// exhaustive: downstream consumers should match every variant.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum CapabilityState {

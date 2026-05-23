@@ -2,6 +2,22 @@
 //!
 //! Most consumers want the `ready-set` binary, not this library. The library
 //! is exposed so integration tests can drive the dispatcher in-process.
+//!
+//! The dispatcher↔plugin contracts the core implements are versioned and
+//! live under
+//! [`docs/contracts/`](https://github.com/pulsearc-ai/ready-set/tree/main/docs/contracts):
+//! [`env-vars.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/env-vars.md)
+//! (the `READY_SET_*` env surface),
+//! [`capabilities.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/capabilities.md)
+//! (descriptor and report shapes),
+//! [`describe.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/describe.md)
+//! and
+//! [`manifest.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/manifest.md)
+//! (plugin metadata discovery),
+//! [`exit-codes.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/exit-codes.md)
+//! (process exit code semantics),
+//! [`cache.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/cache.md)
+//! (the `--list` cache).
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]

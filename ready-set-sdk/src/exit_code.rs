@@ -1,12 +1,15 @@
 //! Documented process exit codes.
 //!
-//! Mirrors `docs/contracts/exit-codes.md` exactly. Adding a variant requires
-//! a corresponding entry in that contract document.
+//! Mirrors
+//! [`docs/contracts/exit-codes.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/exit-codes.md)
+//! exactly. Adding a variant requires a corresponding entry in that contract
+//! document.
 
 use crate::error::Error;
 
 /// Documented process exit codes returned by `ready-set` commands.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum ExitCode {
     /// Success.
     Ok,

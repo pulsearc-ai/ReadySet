@@ -1,6 +1,8 @@
 //! `.ready-set.toml` loading.
 //!
-//! See `docs/contracts/ready-set-toml.md` for the source of truth.
+//! See
+//! [`docs/contracts/ready-set-toml.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/ready-set-toml.md)
+//! for the source of truth.
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
@@ -40,6 +42,11 @@ pub struct Config {
     /// Per-capability configuration, keyed by capability id.
     pub capabilities: BTreeMap<String, CapabilityConfig>,
     /// Per-plugin sections, keyed by plugin name.
+    ///
+    /// The `toml::Value` exposure here leaks `toml = 0.8.x` semver into
+    /// the SDK's public API. Before `0.1.0` stable this will be wrapped
+    /// in an opaque `PluginSection` type so the underlying value
+    /// representation becomes a private implementation detail.
     pub plugins: BTreeMap<String, toml::Value>,
     /// Sections under `[ready-set]` not understood by this SDK version.
     /// Surfaces forward-compat warnings without crashing on extras.

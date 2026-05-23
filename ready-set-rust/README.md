@@ -3,16 +3,17 @@
 The first-party `ready-set` provider for Rust workspace foundations.
 
 This crate ships the `ready-set-rust` binary, a provider plugin discovered
-on `PATH` by the [`ready-set`](../ready-set/) dispatcher. It contributes
-four capabilities to the readiness matrix and answers the lifecycle protocol
-(`__ready`, `__set`, `__go`) for each.
+on `PATH` by the [`ready-set`](https://crates.io/crates/ready-set)
+dispatcher. It contributes four capabilities to the readiness matrix and
+answers the lifecycle protocol (`__ready`, `__set`, `__go`) for each.
 
 The provider id is `rust`. The plugin requires a Cargo workspace
 (`requires_cargo_workspace = true`) — outside one, lifecycle calls return
 `ExitCode::NotCargoWorkspace`.
 
 For the lifecycle grammar and how providers participate in the dispatcher,
-see the workspace root [`README.md`](../README.md).
+see the workspace root
+[`README.md`](https://github.com/pulsearc-ai/ready-set/blob/main/README.md).
 
 ## Install
 
@@ -169,7 +170,8 @@ produced them.
 
 `set --dry-run` writes neither change records nor backups.
 
-See [`docs/contracts/change-log.md`](../docs/contracts/change-log.md).
+See
+[`docs/contracts/change-log.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/change-log.md).
 
 ## Platform support
 
@@ -180,16 +182,17 @@ runs on all three platforms. Path handling uses `std::path::Path` /
 
 ## See also
 
-- Workspace [`README.md`](../README.md) — product, lifecycle, principles,
-  roadmap.
-- [`docs/contracts/`](../docs/contracts/) — versioned protocol specs the
-  provider conforms to.
-- [`ready-set`](../ready-set/) — the dispatcher that discovers and exec's
-  this provider.
-- [`ready-set-sdk`](../ready-set-sdk/) — the SDK this provider builds on;
-  also the recommended starting point for writing your own provider.
+- Workspace [`README.md`](https://github.com/pulsearc-ai/ready-set/blob/main/README.md) —
+  product, lifecycle, principles, roadmap.
+- [`docs/contracts/`](https://github.com/pulsearc-ai/ready-set/tree/main/docs/contracts) —
+  versioned protocol specs the provider conforms to.
+- [`ready-set`](https://crates.io/crates/ready-set) — the dispatcher that
+  discovers and exec's this provider.
+- [`ready-set-sdk`](https://crates.io/crates/ready-set-sdk) — the SDK this
+  provider builds on; also the recommended starting point for writing your
+  own provider.
 
 ## License
 
-Licensed under either of [MIT](../LICENSE-MIT) or
-[Apache-2.0](../LICENSE-APACHE), at your option.
+Licensed under either of [MIT](LICENSE-MIT) or
+[Apache-2.0](LICENSE-APACHE), at your option.

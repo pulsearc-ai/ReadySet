@@ -498,7 +498,7 @@ checksum = "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf"
 
 [[package]]
 name = "ready-set"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -520,7 +520,7 @@ dependencies = [
 
 [[package]]
 name = "ready-set-rust"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "clap",
  "ready-set-sdk",
@@ -536,7 +536,7 @@ dependencies = [
 
 [[package]]
 name = "ready-set-sdk"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "directories",
  "getrandom 0.3.4",

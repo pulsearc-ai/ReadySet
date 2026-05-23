@@ -1,13 +1,16 @@
 [package]
 name         = "ready-set-sdk"
-version      = "0.1.0"
+version      = "0.1.0-alpha.1"
 edition.workspace      = true
 rust-version.workspace = true
 license.workspace      = true
 repository.workspace   = true
-description  = "Shared conventions and helpers for ready-set plugins."
-keywords     = ["ready-set", "cli", "plugin", "sdk"]
-categories   = ["development-tools"]
+description   = "Shared conventions and helpers for ready-set plugins."
+documentation = "https://docs.rs/ready-set-sdk"
+homepage      = "https://github.com/pulsearc-ai/ready-set"
+readme        = "README.md"
+keywords      = ["ready-set", "cli", "plugin", "sdk"]
+categories    = ["development-tools"]
 
 [lib]
 name = "ready_set_sdk"

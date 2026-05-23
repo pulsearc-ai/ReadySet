@@ -1,6 +1,8 @@
 //! `__describe` subcommand support.
 //!
-//! See `docs/contracts/describe.md` for the source of truth.
+//! See
+//! [`docs/contracts/describe.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/describe.md)
+//! for the source of truth.
 
 use std::ffi::OsString;
 use std::io::Write;

@@ -3,21 +3,28 @@
 Shared conventions and helpers for `ready-set` plugins.
 
 This crate is the typed Rust mirror of the contracts under
-[`docs/contracts/`](../docs/contracts/) plus the library helpers that
-first-party plugins use to participate in the lifecycle. It is **not
-required** — any binary on `PATH` named `ready-set-<name>` can be a plugin —
-but using the SDK keeps plugins consistent with the dispatcher and
-first-party tools, and saves writing the same boilerplate across crates.
+[`docs/contracts/`](https://github.com/pulsearc-ai/ready-set/tree/main/docs/contracts)
+plus the library helpers that first-party plugins use to participate in
+the lifecycle. It is **not required** — any binary on `PATH` named
+`ready-set-<name>` can be a plugin — but using the SDK keeps plugins
+consistent with the dispatcher and first-party tools, and saves writing
+the same boilerplate across crates.
 
 For the lifecycle grammar, plugin model, and ecosystem overview, see the
-workspace root [`README.md`](../README.md).
+workspace root
+[`README.md`](https://github.com/pulsearc-ai/ready-set/blob/main/README.md).
 
 ## Install
 
 ```toml
 [dependencies]
-ready-set-sdk = "0.1"
+ready-set-sdk = "0.1.0-alpha.1"
 ```
+
+While the SDK is in the `0.1.0-alpha.*` series, pin the exact pre-release
+version. Cargo does not select pre-release versions for `^0.1` ranges.
+Once `0.1.0` ships, `ready-set-sdk = "0.1"` will pick up patch releases as
+usual.
 
 The SDK is versioned independently of the dispatcher. Plugins pin a major
 version; the dispatcher does not check SDK version compatibility because
@@ -55,7 +62,7 @@ fn main() -> std::process::ExitCode {
 ```
 
 A full runnable version lives at
-[`examples/minimal_plugin.rs`](examples/minimal_plugin.rs):
+[`examples/minimal_plugin.rs`](https://github.com/pulsearc-ai/ready-set/blob/main/ready-set-sdk/examples/minimal_plugin.rs):
 
 ```text
 cargo run --example minimal_plugin -- __describe
@@ -158,8 +165,9 @@ The SDK gives you:
 `set --dry-run` must not write change logs or backups. The SDK helpers
 expose dry-run aware variants.
 
-See [`docs/contracts/change-log.md`](../docs/contracts/change-log.md) for
-the authoritative format.
+See
+[`docs/contracts/change-log.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/change-log.md)
+for the authoritative format.
 
 ## Cross-plugin composition
 
@@ -182,12 +190,31 @@ scenarios).
 - The SDK's Rust API follows standard cargo semver within
   `ready-set-sdk`'s own version space.
 - The contracts the SDK mirrors are tiered separately. See
-  [`docs/contracts/README.md`](../docs/contracts/README.md) for which
-  contracts are `stable` vs `experimental`.
-- The `Error` enum is `#[non_exhaustive]`; callers should use a wildcard
-  arm. Adding a variant in a future minor release is non-breaking.
+  [`docs/contracts/README.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/README.md)
+  for which contracts are `stable` vs `experimental`.
+- `#[non_exhaustive]` enums: `Error`, `ExitCode`, `DispatchOutcome`, and
+  `sandbox::Capability`. Match these with a wildcard arm. Other enums
+  (`CapabilityState`, `OutputMode`, `Stability`, `Platform`, `ChangeOp`, …)
+  are intentionally exhaustive — they are pinned to versioned wire
+  contracts, so adding a variant is a contract bump.
 - The `sandbox` trait is `stable` in surface but its implementations are
   `experimental` and will gain real enforcement post-v0.1.0.
+
+### Public dependency surface
+
+The SDK re-exports some types from its own dependencies; those deps are
+part of the SDK's public API and follow these rules:
+
+- **`semver::Version`** (from `semver = 1.x`) is exposed in `Describe`,
+  `Manifest`, and `Context::dispatcher_version()`. This is intentional —
+  `semver::Version` is the de-facto Rust representation and wrapping it
+  would force every plugin author to learn a parallel API. Bumping the
+  `semver` major requirement is a major SDK bump.
+- **`toml::Value`** (from `toml = 0.8.x`) currently appears in
+  `Config.plugins`. This is **not** intentional and will be replaced
+  before `0.1.0` stable with an opaque `PluginSection` wrapper so the
+  underlying representation becomes a private implementation detail.
+  Pre-`0.1.0` SDK releases may change this without further notice.
 
 ## Testing
 
@@ -200,15 +227,16 @@ the published examples in `docs/contracts/`.
 
 ## See also
 
-- Workspace [`README.md`](../README.md) — product, lifecycle, plugin
-  authoring overview.
-- [`docs/contracts/`](../docs/contracts/) — the authoritative wire and API
-  contracts the SDK mirrors.
-- [`ready-set`](../ready-set/) — the dispatcher binary that exec's plugins.
-- [`ready-set-rust`](../ready-set-rust/) — a worked example of a real
-  capability provider built on this SDK.
+- Workspace [`README.md`](https://github.com/pulsearc-ai/ready-set/blob/main/README.md) —
+  product, lifecycle, plugin authoring overview.
+- [`docs/contracts/`](https://github.com/pulsearc-ai/ready-set/tree/main/docs/contracts) —
+  the authoritative wire and API contracts the SDK mirrors.
+- [`ready-set`](https://crates.io/crates/ready-set) — the dispatcher binary
+  that exec's plugins.
+- [`ready-set-rust`](https://crates.io/crates/ready-set-rust) — a worked
+  example of a real capability provider built on this SDK.
 
 ## License
 
-Licensed under either of [MIT](../LICENSE-MIT) or
-[Apache-2.0](../LICENSE-APACHE), at your option.
+Licensed under either of [MIT](LICENSE-MIT) or
+[Apache-2.0](LICENSE-APACHE), at your option.

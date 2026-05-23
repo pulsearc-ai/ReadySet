@@ -1,4 +1,18 @@
 //! Rust capability provider plugin for `ready-set`.
+//!
+//! Contributes four capabilities (`workspace`, `toolchain`, `formatting`,
+//! `linting`) to the readiness matrix and answers the `__ready` / `__set` /
+//! `__go` lifecycle protocol per capability. The plugin requires a Cargo
+//! workspace; outside one, lifecycle calls return
+//! [`ExitCode::NotCargoWorkspace`](ready_set_sdk::ExitCode::NotCargoWorkspace).
+//!
+//! Contracts this provider conforms to:
+//! [`capabilities.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/capabilities.md)
+//! (descriptor and report shapes),
+//! [`change-log.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/change-log.md)
+//! (records every `__set` write for reversibility), and
+//! [`ready-set-toml.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/ready-set-toml.md)
+//! (the `.ready-set.toml` schema this provider seeds).
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]

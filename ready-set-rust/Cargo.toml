@@ -1,13 +1,16 @@
 [package]
 name         = "ready-set-rust"
-version      = "0.1.0"
+version      = "0.1.0-alpha.1"
 edition.workspace      = true
 rust-version.workspace = true
 license.workspace      = true
 repository.workspace   = true
-description  = "Rust capability provider plugin for ready-set."
-keywords     = ["ready-set", "rust", "plugin"]
-categories   = ["command-line-utilities", "development-tools"]
+description   = "Rust capability provider plugin for ready-set."
+documentation = "https://docs.rs/ready-set-rust"
+homepage      = "https://github.com/pulsearc-ai/ready-set"
+readme        = "README.md"
+keywords      = ["ready-set", "rust", "plugin"]
+categories    = ["command-line-utilities", "development-tools"]
 
 [[bin]]
 name = "ready-set-rust"

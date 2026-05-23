@@ -31,7 +31,7 @@ which              = "6"
 
 [workspace.dependencies.ready-set-sdk]
 path    = "ready-set-sdk"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 
 [workspace.lints.rust]
 unsafe_code              = "forbid"
