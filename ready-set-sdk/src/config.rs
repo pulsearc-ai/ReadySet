@@ -1,7 +1,7 @@
 //! `.ready-set.toml` loading.
 //!
 //! See
-//! [`docs/contracts/ready-set-toml.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/ready-set-toml.md)
+//! [`docs/contracts/ready-set-toml.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/ready-set-toml.md)
 //! for the source of truth.
 
 use std::collections::BTreeMap;

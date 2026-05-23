@@ -1,7 +1,7 @@
 //! Per-invocation context populated from the dispatcher env contract.
 //!
 //! See
-//! [`docs/contracts/env-vars.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/env-vars.md)
+//! [`docs/contracts/env-vars.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/env-vars.md)
 //! for the source of truth.
 
 use std::env;

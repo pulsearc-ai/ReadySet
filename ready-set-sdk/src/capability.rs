@@ -1,7 +1,7 @@
 //! Capability lifecycle contract types.
 //!
 //! Typed Rust mirrors of
-//! [`docs/contracts/capabilities.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/capabilities.md).
+//! [`docs/contracts/capabilities.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/capabilities.md).
 
 use std::fmt;
 

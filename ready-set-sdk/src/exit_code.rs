@@ -1,7 +1,7 @@
 //! Documented process exit codes.
 //!
 //! Mirrors
-//! [`docs/contracts/exit-codes.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/exit-codes.md)
+//! [`docs/contracts/exit-codes.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/exit-codes.md)
 //! exactly. Adding a variant requires a corresponding entry in that contract
 //! document.
 

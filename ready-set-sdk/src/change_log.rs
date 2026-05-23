@@ -1,7 +1,7 @@
 //! Change-log records for reversibility.
 //!
 //! See
-//! [`docs/contracts/change-log.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/change-log.md)
+//! [`docs/contracts/change-log.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/change-log.md)
 //! for the source of truth.
 
 use std::fs::{self, File, OpenOptions};

@@ -1,7 +1,7 @@
 //! Plugin manifest sidecar parsing.
 //!
 //! See
-//! [`docs/contracts/manifest.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/manifest.md)
+//! [`docs/contracts/manifest.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/manifest.md)
 //! for the source of truth.
 
 use std::path::{Path, PathBuf};

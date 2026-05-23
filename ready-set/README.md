@@ -15,7 +15,7 @@ The dispatcher's job is to route, not to act.
 
 For the product overview, lifecycle grammar, and full architecture, see the
 workspace root
-[`README.md`](https://github.com/pulsearc-ai/ready-set/blob/main/README.md).
+[`README.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/README.md).
 
 ## Install
 
@@ -111,7 +111,7 @@ The submodules (`builtins`, `capabilities`, `cli`, `discovery`, `lifecycle`,
 `metadata`, `cache`, `exec`, `env`, `project`) are public so integration
 tests can assemble pieces in isolation, but they are not a stable embedder
 API. The stable surface is the CLI and the contracts under
-[`docs/contracts/`](https://github.com/pulsearc-ai/ready-set/tree/main/docs/contracts).
+[`docs/contracts/`](https://github.com/pulsearc-ai/ReadySet/tree/main/docs/contracts).
 
 ## Plugin discovery and registry
 
@@ -147,7 +147,7 @@ READY_SET_COLOR
 
 The dispatcher strips unknown incoming `READY_SET_*` variables before
 invoking providers. See
-[`docs/contracts/env-vars.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/env-vars.md).
+[`docs/contracts/env-vars.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/env-vars.md).
 
 ## Cross-platform notes
 
@@ -171,11 +171,11 @@ invoking providers. See
 
 ## See also
 
-- Workspace [`README.md`](https://github.com/pulsearc-ai/ready-set/blob/main/README.md) —
+- Workspace [`README.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/README.md) —
   product, lifecycle, principles, roadmap.
-- [`AGENTS.md`](https://github.com/pulsearc-ai/ready-set/blob/main/AGENTS.md) —
+- [`AGENTS.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/AGENTS.md) —
   working guidance for coding agents.
-- [`docs/contracts/`](https://github.com/pulsearc-ai/ready-set/tree/main/docs/contracts) —
+- [`docs/contracts/`](https://github.com/pulsearc-ai/ReadySet/tree/main/docs/contracts) —
   versioned protocol specs.
 - [`ready-set-sdk`](https://crates.io/crates/ready-set-sdk) — types and
   helpers used by both the dispatcher and provider plugins.

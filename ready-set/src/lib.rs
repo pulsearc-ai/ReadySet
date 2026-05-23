@@ -5,18 +5,18 @@
 //!
 //! The dispatcher↔plugin contracts the core implements are versioned and
 //! live under
-//! [`docs/contracts/`](https://github.com/pulsearc-ai/ready-set/tree/main/docs/contracts):
-//! [`env-vars.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/env-vars.md)
+//! [`docs/contracts/`](https://github.com/pulsearc-ai/ReadySet/tree/main/docs/contracts):
+//! [`env-vars.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/env-vars.md)
 //! (the `READY_SET_*` env surface),
-//! [`capabilities.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/capabilities.md)
+//! [`capabilities.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/capabilities.md)
 //! (descriptor and report shapes),
-//! [`describe.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/describe.md)
+//! [`describe.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/describe.md)
 //! and
-//! [`manifest.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/manifest.md)
+//! [`manifest.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/manifest.md)
 //! (plugin metadata discovery),
-//! [`exit-codes.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/exit-codes.md)
+//! [`exit-codes.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/exit-codes.md)
 //! (process exit code semantics),
-//! [`cache.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/cache.md)
+//! [`cache.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/cache.md)
 //! (the `--list` cache).
 
 #![forbid(unsafe_code)]

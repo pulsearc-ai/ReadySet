@@ -15,7 +15,7 @@ The provider id is `rust`. The plugin requires a Cargo workspace
 
 For the lifecycle grammar and how providers participate in the dispatcher,
 see the workspace root
-[`README.md`](https://github.com/pulsearc-ai/ready-set/blob/main/README.md).
+[`README.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/README.md).
 
 ## Install
 
@@ -173,7 +173,7 @@ produced them.
 `set --dry-run` writes neither change records nor backups.
 
 See
-[`docs/contracts/change-log.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/change-log.md).
+[`docs/contracts/change-log.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/change-log.md).
 
 ## Platform support
 
@@ -184,9 +184,9 @@ runs on all three platforms. Path handling uses `std::path::Path` /
 
 ## See also
 
-- Workspace [`README.md`](https://github.com/pulsearc-ai/ready-set/blob/main/README.md) —
+- Workspace [`README.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/README.md) —
   product, lifecycle, principles, roadmap.
-- [`docs/contracts/`](https://github.com/pulsearc-ai/ready-set/tree/main/docs/contracts) —
+- [`docs/contracts/`](https://github.com/pulsearc-ai/ReadySet/tree/main/docs/contracts) —
   versioned protocol specs the provider conforms to.
 - [`ready-set`](https://crates.io/crates/ready-set) — the dispatcher that
   discovers and exec's this provider.

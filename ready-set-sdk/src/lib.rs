@@ -3,7 +3,7 @@
 //! Shared conventions and helpers for `ready-set` plugins.
 //!
 //! The SDK is the typed Rust mirror of the contracts under
-//! [`docs/contracts/`](https://github.com/pulsearc-ai/ready-set/tree/main/docs/contracts).
+//! [`docs/contracts/`](https://github.com/pulsearc-ai/ReadySet/tree/main/docs/contracts).
 //! Plugins are not required to use the SDK — any binary on PATH can be a
 //! plugin — but using it makes plugins consistent with first-party tools and
 //! saves writing the same boilerplate.

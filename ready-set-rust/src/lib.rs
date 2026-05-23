@@ -7,11 +7,11 @@
 //! [`ExitCode::NotCargoWorkspace`](ready_set_sdk::ExitCode::NotCargoWorkspace).
 //!
 //! Contracts this provider conforms to:
-//! [`capabilities.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/capabilities.md)
+//! [`capabilities.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/capabilities.md)
 //! (descriptor and report shapes),
-//! [`change-log.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/change-log.md)
+//! [`change-log.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/change-log.md)
 //! (records every `__set` write for reversibility), and
-//! [`ready-set-toml.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/ready-set-toml.md)
+//! [`ready-set-toml.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/ready-set-toml.md)
 //! (the `.ready-set.toml` schema this provider seeds).
 
 #![forbid(unsafe_code)]

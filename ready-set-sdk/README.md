@@ -5,7 +5,7 @@
 Shared conventions and helpers for `ready-set` plugins.
 
 This crate is the typed Rust mirror of the contracts under
-[`docs/contracts/`](https://github.com/pulsearc-ai/ready-set/tree/main/docs/contracts)
+[`docs/contracts/`](https://github.com/pulsearc-ai/ReadySet/tree/main/docs/contracts)
 plus the library helpers that first-party plugins use to participate in
 the lifecycle. It is **not required** — any binary on `PATH` named
 `ready-set-<name>` can be a plugin — but using the SDK keeps plugins
@@ -14,7 +14,7 @@ the same boilerplate across crates.
 
 For the lifecycle grammar, plugin model, and ecosystem overview, see the
 workspace root
-[`README.md`](https://github.com/pulsearc-ai/ready-set/blob/main/README.md).
+[`README.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/README.md).
 
 ## Install
 
@@ -64,7 +64,7 @@ fn main() -> std::process::ExitCode {
 ```
 
 A full runnable version lives at
-[`examples/minimal_plugin.rs`](https://github.com/pulsearc-ai/ready-set/blob/main/ready-set-sdk/examples/minimal_plugin.rs):
+[`examples/minimal_plugin.rs`](https://github.com/pulsearc-ai/ReadySet/blob/main/ready-set-sdk/examples/minimal_plugin.rs):
 
 ```text
 cargo run --example minimal_plugin -- __describe
@@ -168,7 +168,7 @@ The SDK gives you:
 expose dry-run aware variants.
 
 See
-[`docs/contracts/change-log.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/change-log.md)
+[`docs/contracts/change-log.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/change-log.md)
 for the authoritative format.
 
 ## Cross-plugin composition
@@ -192,7 +192,7 @@ scenarios).
 - The SDK's Rust API follows standard cargo semver within
   `ready-set-sdk`'s own version space.
 - The contracts the SDK mirrors are tiered separately. See
-  [`docs/contracts/README.md`](https://github.com/pulsearc-ai/ready-set/blob/main/docs/contracts/README.md)
+  [`docs/contracts/README.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/README.md)
   for which contracts are `stable` vs `experimental`.
 - `#[non_exhaustive]` enums: `Error`, `ExitCode`, `DispatchOutcome`, and
   `sandbox::Capability`. Match these with a wildcard arm. Other enums
@@ -229,9 +229,9 @@ the published examples in `docs/contracts/`.
 
 ## See also
 
-- Workspace [`README.md`](https://github.com/pulsearc-ai/ready-set/blob/main/README.md) —
+- Workspace [`README.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/README.md) —
   product, lifecycle, plugin authoring overview.
-- [`docs/contracts/`](https://github.com/pulsearc-ai/ready-set/tree/main/docs/contracts) —
+- [`docs/contracts/`](https://github.com/pulsearc-ai/ReadySet/tree/main/docs/contracts) —
   the authoritative wire and API contracts the SDK mirrors.
 - [`ready-set`](https://crates.io/crates/ready-set) — the dispatcher binary
   that exec's plugins.
