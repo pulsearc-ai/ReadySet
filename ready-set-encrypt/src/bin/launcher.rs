@@ -558,9 +558,10 @@ mod windows_main {
 
         #[test]
         fn doubles_backslashes_before_closing_quote() {
-            // The arg `a\` inside a quoted segment: trailing `\` would
-            // otherwise escape the closing quote. Must emit `a\\"`.
-            assert_eq!(cmdline(&["x", "a\\"]), "x \"a\\\\\"");
+            // The arg `a \` requires quoting because it contains a space.
+            // The trailing `\` must be doubled so it cannot escape the
+            // closing quote.
+            assert_eq!(cmdline(&["x", "a \\"]), "x \"a \\\\\"");
         }
 
         #[test]
