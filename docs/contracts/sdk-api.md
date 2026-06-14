@@ -26,6 +26,7 @@ ready_set_sdk
 ├── exit_code
 ├── change_log
 ├── describe
+├── command_alias
 ├── manifest
 ├── sandbox
 ├── config
@@ -45,6 +46,7 @@ pub mod output;
 pub mod exit_code;
 pub mod change_log;
 pub mod describe;
+pub mod command_alias;
 pub mod manifest;
 pub mod sandbox;
 pub mod config;
@@ -61,6 +63,7 @@ pub use capability::{
     CapabilityRelevance, CapabilityReport, CapabilityRunReport, CapabilityState,
     CapabilityVerb, NextAction, ProviderId, RunStatus,
 };
+pub use command_alias::{CommandAlias, CommandAliasTarget};
 pub use output::{Output, OutputMode};
 pub use exit_code::ExitCode;
 pub use lifecycle::{
@@ -78,6 +81,7 @@ pub use crate::capability::{
     CapabilityRelevance, CapabilityReport, CapabilityRunReport, CapabilityState,
     CapabilityVerb, NextAction, ProviderId, RunStatus,
 };
+pub use crate::command_alias::{CommandAlias, CommandAliasTarget};
 pub use crate::exit_code::ExitCode;
 pub use crate::lifecycle::{
     LifecycleRequest, LifecycleRequestError, parse_lifecycle_request,
@@ -232,7 +236,7 @@ pub enum ExitCode {
     UserError,
     SystemError,
     DependencyMissing,
-    NotCargoWorkspace,
+    ProjectRequirementMissing,
     ContractViolation,
     UnknownSubcommand,
     Signaled(u8),
@@ -294,8 +298,9 @@ pub struct Describe {
     pub stability: Stability,
     pub min_dispatcher_version: semver::Version,
     pub platforms: Vec<Platform>,
-    pub requires_cargo_workspace: bool,
+    pub project_requirements: Vec<String>,
     pub capabilities: Vec<crate::capability::CapabilityDescriptor>,
+    pub command_aliases: Vec<crate::command_alias::CommandAlias>,
 }
 
 pub enum Stability { Stable, Experimental, Deprecated }
@@ -308,6 +313,33 @@ impl Describe {
 }
 ```
 
+## `command_alias`
+
+```rust
+pub struct CommandAlias {
+    pub name: String,
+    pub description: String,
+    pub match_first_arg: Option<String>,
+    pub target: CommandAliasTarget,
+}
+
+pub enum CommandAliasTarget {
+    Set { capability: crate::capability::CapabilityId },
+    Go { capability: crate::capability::CapabilityId },
+    Plugin { args: Vec<String> },
+}
+
+impl CommandAlias {
+    pub fn matches_args(&self, user_args: &[std::ffi::OsString]) -> bool;
+    pub fn specificity(&self) -> u8;
+}
+```
+
+`CommandAlias` carries a provider-declared `ready-set <name>` command. See the
+[manifest](manifest.md#command-aliases) and [`__describe`](describe.md)
+contracts for the wire shape; `matches_args` and `specificity` support the
+dispatcher's most-specific-wins selection when several aliases share a `name`.
+
 ## `manifest`
 
 ```rust
@@ -317,8 +349,9 @@ pub struct Manifest {
     pub stability: crate::describe::Stability,
     pub min_dispatcher_version: semver::Version,
     pub platforms: Vec<crate::describe::Platform>,
-    pub requires_cargo_workspace: bool,
+    pub project_requirements: Vec<String>,
     pub capabilities: Vec<crate::capability::CapabilityDescriptor>,
+    pub command_aliases: Vec<crate::command_alias::CommandAlias>,
 }
 
 impl Manifest {
@@ -358,7 +391,7 @@ pub struct Config {
     pub path: std::path::PathBuf,
     pub ready_set: ProjectMeta,
     pub capabilities: std::collections::BTreeMap<String, CapabilityConfig>,
-    pub plugins: std::collections::BTreeMap<String, toml::Value>,
+    pub plugins: std::collections::BTreeMap<String, PluginSection>,
     pub unknown_keys: Vec<String>,
 }
 
@@ -371,6 +404,18 @@ pub struct CapabilityConfig {
     pub relevance: Option<crate::capability::CapabilityRelevance>,
     pub provider: Option<crate::capability::ProviderId>,
     pub unknown_keys: Vec<String>,
+}
+
+pub struct PluginSection { /* fields private */ }
+
+impl PluginSection {
+    pub fn deserialize<T>(&self) -> Result<T>
+    where
+        T: serde::de::DeserializeOwned;
+    pub fn get_str(&self, key: &str) -> Option<&str>;
+    pub fn get_bool(&self, key: &str) -> Option<bool>;
+    pub fn get_integer(&self, key: &str) -> Option<i64>;
+    pub fn get_string_array(&self, key: &str) -> Option<Vec<String>>;
 }
 
 pub fn load_config(start: &std::path::Path) -> Result<Option<Config>>;

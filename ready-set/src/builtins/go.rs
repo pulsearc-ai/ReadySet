@@ -30,6 +30,10 @@ struct Options {
     /// Debug logging.
     #[arg(long)]
     pub verbose: bool,
+
+    /// Provider-specific arguments forwarded after `--`.
+    #[arg(last = true, allow_hyphen_values = true)]
+    pub provider_args: Vec<OsString>,
 }
 
 /// Built-in entry point. The dispatcher routes here for `ready-set go`.
@@ -41,6 +45,10 @@ pub fn run(args: &[OsString], contract: &EnvContract) -> ExitCode {
             return ExitCode::UserError;
         },
     };
+    if opts.capability.is_none() && !opts.provider_args.is_empty() {
+        eprintln!("ready-set go: provider arguments after `--` require an explicit capability");
+        return ExitCode::UserError;
+    }
     let cwd = match std::env::current_dir() {
         Ok(cwd) => cwd,
         Err(err) => {
@@ -66,6 +74,7 @@ pub fn run(args: &[OsString], contract: &EnvContract) -> ExitCode {
     }
 
     let capture_json = matches!(contract.output, OutputMode::Json) || opts.json;
+    let provider_args = provider_args(&opts);
     let mut reports = Vec::new();
     let mut exit_code = ExitCode::Ok;
 
@@ -78,7 +87,7 @@ pub fn run(args: &[OsString], contract: &EnvContract) -> ExitCode {
         match invoke_go(
             &capability.provider,
             capability.id.as_str(),
-            &[],
+            &provider_args,
             contract,
             capture_json,
         ) {
@@ -135,6 +144,10 @@ pub fn run(args: &[OsString], contract: &EnvContract) -> ExitCode {
     }
 
     exit_code
+}
+
+fn provider_args(opts: &Options) -> Vec<OsString> {
+    opts.provider_args.clone()
 }
 
 fn select_capabilities<'a>(
@@ -214,8 +227,9 @@ mod tests {
             stability: ready_set_sdk::describe::Stability::Stable,
             min_dispatcher_version: "0.1.0".parse().unwrap(),
             platforms: vec![ready_set_sdk::describe::Platform::current().unwrap()],
-            requires_cargo_workspace: false,
+            project_requirements: Vec::new(),
             capabilities,
+            command_aliases: Vec::new(),
         }
     }
 
@@ -231,6 +245,30 @@ mod tests {
             verbs,
             default_relevance: relevance,
         }
+    }
+
+    #[test]
+    fn provider_args_preserve_passthrough_flags() {
+        let opts = Options {
+            capability: Some("runtime".into()),
+            json: false,
+            quiet: false,
+            verbose: false,
+            provider_args: vec![
+                OsString::from("smoke"),
+                OsString::from("--seed"),
+                OsString::from("https://example.com/"),
+            ],
+        };
+
+        assert_eq!(
+            provider_args(&opts),
+            vec![
+                OsString::from("smoke"),
+                OsString::from("--seed"),
+                OsString::from("https://example.com/"),
+            ]
+        );
     }
 
     #[test]

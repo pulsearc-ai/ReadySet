@@ -183,8 +183,9 @@ mod tests {
             stability: Stability::Stable,
             min_dispatcher_version: "0.1.0".parse().unwrap(),
             platforms: vec![Platform::Linux],
-            requires_cargo_workspace: false,
+            project_requirements: Vec::new(),
             capabilities: Vec::new(),
+            command_aliases: Vec::new(),
         }
     }
 

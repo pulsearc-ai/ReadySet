@@ -20,13 +20,10 @@ workspace root
 
 ```toml
 [dependencies]
-ready-set-sdk = "0.1.0-alpha.1"
+ready-set-sdk = "0.1.0"
 ```
 
-While the SDK is in the `0.1.0-alpha.*` series, pin the exact pre-release
-version. Cargo does not select pre-release versions for `^0.1` ranges.
-Once `0.1.0` ships, `ready-set-sdk = "0.1"` will pick up patch releases as
-usual.
+`ready-set-sdk = "0.1"` will pick up compatible patch releases as usual.
 
 The SDK is versioned independently of the dispatcher. Plugins pin a major
 version; the dispatcher does not check SDK version compatibility because
@@ -212,11 +209,10 @@ part of the SDK's public API and follow these rules:
   `semver::Version` is the de-facto Rust representation and wrapping it
   would force every plugin author to learn a parallel API. Bumping the
   `semver` major requirement is a major SDK bump.
-- **`toml::Value`** (from `toml = 0.8.x`) currently appears in
-  `Config.plugins`. This is **not** intentional and will be replaced
-  before `0.1.0` stable with an opaque `PluginSection` wrapper so the
-  underlying representation becomes a private implementation detail.
-  Pre-`0.1.0` SDK releases may change this without further notice.
+- **`toml::Value`** (from `toml = 0.8.x`) is kept behind
+  `config::PluginSection`. Plugin authors should use the typed
+  `deserialize` helper or scalar accessors rather than depending on the
+  SDK's internal TOML representation.
 
 ## Testing
 

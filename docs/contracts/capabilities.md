@@ -126,7 +126,7 @@ plugin exposes no lifecycle capabilities.
   "stability": "stable",
   "min_dispatcher_version": "0.1.0",
   "platforms": ["linux", "macos", "windows"],
-  "requires_cargo_workspace": true,
+  "project_requirements": ["cargo-workspace"],
   "capabilities": [
     {
       "id": "linting",

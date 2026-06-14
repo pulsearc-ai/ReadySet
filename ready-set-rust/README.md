@@ -9,9 +9,10 @@ on `PATH` by the [`ready-set`](https://crates.io/crates/ready-set)
 dispatcher. It contributes four capabilities to the readiness matrix and
 answers the lifecycle protocol (`__ready`, `__set`, `__go`) for each.
 
-The provider id is `rust`. The plugin requires a Cargo workspace
-(`requires_cargo_workspace = true`) — outside one, lifecycle calls return
-`ExitCode::NotCargoWorkspace`.
+The provider id is `rust`. The plugin declares a Cargo workspace project
+requirement (`project_requirements = ["cargo-workspace"]`) — outside one,
+lifecycle calls return
+`ExitCode::ProjectRequirementMissing`.
 
 For the lifecycle grammar and how providers participate in the dispatcher,
 see the workspace root

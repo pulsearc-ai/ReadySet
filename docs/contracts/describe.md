@@ -3,7 +3,7 @@
 | Field     | Value                                                                          |
 |-----------|--------------------------------------------------------------------------------|
 | Stability | `stable`                                                                       |
-| Version   | 1                                                                              |
+| Version   | 2                                                                              |
 | Invoked   | `<plugin-binary> __describe`                                                   |
 | Schema    | [`schemas/describe.schema.json`](schemas/describe.schema.json) (Draft 2020-12) |
 
@@ -49,11 +49,14 @@ The JSON object has the same fields as the [manifest sidecar](manifest.md),
 including the required `capabilities` array:
 
 ```json
-{"description":"one-line summary","version":"1.2.3","stability":"stable","min_dispatcher_version":"0.1.0","platforms":["linux","macos","windows"],"requires_cargo_workspace":false,"capabilities":[]}
+{"description":"one-line summary","version":"1.2.3","stability":"stable","min_dispatcher_version":"0.1.0","platforms":["linux","macos","windows"],"capabilities":[]}
 ```
 
-All keys listed in [manifest.md](manifest.md) are required. The output MUST
-fit on a single line (no embedded newlines).
+The required keys are those marked required in [manifest.md](manifest.md):
+`description`, `version`, `stability`, `min_dispatcher_version`, `platforms`,
+and `capabilities`. The optional `project_requirements` and `command_aliases`
+arrays are omitted when empty. The output MUST fit on a single line (no embedded
+newlines).
 
 ## Worked example
 
@@ -64,7 +67,7 @@ fn main() {
     let mut args = std::env::args();
     let _exe = args.next();
     if args.next().as_deref() == Some("__describe") {
-        println!(r#"{{"description":"Reference plugin","version":"0.1.0","stability":"stable","min_dispatcher_version":"0.1.0","platforms":["linux","macos","windows"],"requires_cargo_workspace":false,"capabilities":[]}}"#);
+        println!(r#"{{"description":"Reference plugin","version":"0.1.0","stability":"stable","min_dispatcher_version":"0.1.0","platforms":["linux","macos","windows"],"capabilities":[]}}"#);
         return;
     }
     // ... normal plugin behavior
@@ -76,7 +79,7 @@ A POSIX shell plugin:
 ```sh
 #!/bin/sh
 if [ "$1" = "__describe" ]; then
-  printf '{"description":"shell example","version":"0.0.1","stability":"experimental","min_dispatcher_version":"0.1.0","platforms":["linux","macos"],"requires_cargo_workspace":false,"capabilities":[]}\n'
+  printf '{"description":"shell example","version":"0.0.1","stability":"experimental","min_dispatcher_version":"0.1.0","platforms":["linux","macos"],"capabilities":[]}\n'
   exit 0
 fi
 # ... normal plugin behavior

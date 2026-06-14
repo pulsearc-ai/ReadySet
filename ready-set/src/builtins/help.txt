@@ -14,6 +14,8 @@ BUILT-IN SUBCOMMANDS:
 PLUGIN SUBCOMMANDS:
     Any binary on PATH named `ready-set-<name>` is a plugin and can be invoked
     as `ready-set <name>`. Discover installed plugins with `ready-set --list`.
+    Plugins may also declare aliases such as `ready-set rotate`; aliases are
+    shown as KIND=alias in `ready-set --list`.
 
 META FLAGS:
     --help, -h          Print this help.

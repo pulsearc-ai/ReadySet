@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members  = ["ready-set", "ready-set-rust", "ready-set-sdk"]
+members  = ["ready-set", "ready-set-auth", "ready-set-encrypt", "ready-set-plugin", "ready-set-rust", "ready-set-sdk"]
 
 [workspace.package]
 edition      = "2024"
@@ -9,15 +9,20 @@ license      = "MIT OR Apache-2.0"
 repository   = "https://github.com/pulsearc-ai/ReadySet"
 
 [workspace.dependencies]
+aes-gcm            = "0.10"
 anyhow             = "1"
+base64             = "0.22"
+chacha20poly1305   = "0.10"
 clap               = { version = "4", features = ["derive"] }
 directories        = "5"
 getrandom          = { version = "0.3", features = ["std"] }
 glob               = "0.3"
 is-terminal        = "0.4"
+regex              = "1"
 semver             = { version = "1", features = ["serde"] }
 serde              = { version = "1", features = ["derive"] }
 serde_json         = "1"
+serde_yaml_ng      = "0.10"
 sha2               = "0.10"
 tempfile           = "3"
 thiserror          = "1"
@@ -26,12 +31,14 @@ toml               = "0.8"
 toml_edit          = "0.22"
 tracing            = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+ureq               = "3"
 walkdir            = "2"
 which              = "6"
+zeroize            = "1"
 
 [workspace.dependencies.ready-set-sdk]
 path    = "ready-set-sdk"
-version = "0.1.0-alpha.1"
+version = "0.1.0"
 
 [workspace.lints.rust]
 unsafe_code              = "forbid"

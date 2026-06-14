@@ -14,8 +14,9 @@ fn describe_serializes_to_one_line_json() {
         stability: Stability::Stable,
         min_dispatcher_version: "0.1.0".parse().unwrap(),
         platforms: vec![Platform::Linux, Platform::Macos, Platform::Windows],
-        requires_cargo_workspace: false,
+        project_requirements: Vec::new(),
         capabilities: Vec::new(),
+        command_aliases: Vec::new(),
     };
     let json = serde_json::to_string(&d).unwrap();
     assert!(!json.contains('\n'));
@@ -35,7 +36,6 @@ version                  = "0.1.0"
 stability                = "stable"
 min_dispatcher_version   = "0.1.0"
 platforms                = ["linux", "macos", "windows"]
-requires_cargo_workspace = false
 capabilities             = []
 "#,
     )

@@ -62,7 +62,7 @@ fn run_go(ctx: &Context, capability: &str, args: &[std::ffi::OsString]) -> ExitC
                  [package] found above {})",
                 root.display()
             );
-            return ExitCode::NotCargoWorkspace;
+            return ExitCode::ProjectRequirementMissing;
         },
         Err(err) => {
             eprintln!("ready-set-rust: {err}");
@@ -134,7 +134,7 @@ fn run_set(ctx: &Context, capability: &str, args: &[std::ffi::OsString]) -> Exit
                  [package] found above {})",
                 root.display()
             );
-            return ExitCode::NotCargoWorkspace;
+            return ExitCode::ProjectRequirementMissing;
         },
         Err(err) => {
             eprintln!("ready-set-rust: {err}");

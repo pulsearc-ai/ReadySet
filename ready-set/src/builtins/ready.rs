@@ -208,8 +208,9 @@ mod tests {
             stability: ready_set_sdk::describe::Stability::Stable,
             min_dispatcher_version: "0.1.0".parse().unwrap(),
             platforms: vec![ready_set_sdk::describe::Platform::current().unwrap()],
-            requires_cargo_workspace: false,
+            project_requirements: Vec::new(),
             capabilities,
+            command_aliases: Vec::new(),
         }
     }
 

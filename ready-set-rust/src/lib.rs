@@ -4,7 +4,7 @@
 //! `linting`) to the readiness matrix and answers the `__ready` / `__set` /
 //! `__go` lifecycle protocol per capability. The plugin requires a Cargo
 //! workspace; outside one, lifecycle calls return
-//! [`ExitCode::NotCargoWorkspace`](ready_set_sdk::ExitCode::NotCargoWorkspace).
+//! [`ExitCode::ProjectRequirementMissing`](ready_set_sdk::ExitCode::ProjectRequirementMissing).
 //!
 //! Contracts this provider conforms to:
 //! [`capabilities.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/capabilities.md)
@@ -47,8 +47,9 @@ pub fn describe() -> Describe {
             .parse()
             .unwrap_or_else(|_| semver::Version::new(0, 1, 0)),
         platforms: vec![Platform::Linux, Platform::Macos, Platform::Windows],
-        requires_cargo_workspace: true,
+        project_requirements: vec!["cargo-workspace".into()],
         capabilities: rust_capabilities(),
+        command_aliases: Vec::new(),
     }
 }
 

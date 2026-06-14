@@ -251,8 +251,8 @@ These principles are binding for any change to the core or the SDK contract.
 7. **Composability over completeness.** Each capability is useful in
    isolation, scriptable, and produces machine-readable output (`--json`).
 8. **Reversibility.** `set` mutations are recorded to a per-project change
-   log so `ready-set undo` can reverse them. `ready` and `go` do not write
-   files.
+   log so the planned `ready-set undo` can reverse them. `ready` and `go` do
+   not write files.
 9. **No telemetry.** If ever added, opt-in, documented, disabled in CI.
 10. **Stable contracts over fast iteration.** The dispatcher↔plugin surface
     is a long-term API. Designed carefully before v0.1.0; post-v0.1.0
@@ -518,7 +518,7 @@ Schema (same shape for both):
   "stability": "stable",
   "min_dispatcher_version": "0.1.0",
   "platforms": ["linux", "macos", "windows"],
-  "requires_cargo_workspace": false,
+  "project_requirements": ["cargo-workspace"],
   "capabilities": [
     {
       "id": "workspace",
@@ -775,10 +775,10 @@ Future:
 - **Plugin discovery / search** — `ready-set search <query>` queries
   crates.io for `ready-set-*` crates.
 
-## Roadmap to v0.1.0
+## Roadmap
 
 The capability lifecycle is implemented and binding. The remaining work is
-documentation polish, the `undo` built-in, and the v0.1.0 acceptance gate.
+release infrastructure and the planned `undo` built-in.
 
 ### Done
 
@@ -800,18 +800,17 @@ documentation polish, the `undo` built-in, and the v0.1.0 acceptance gate.
    parsing, env contract parity across `ready` / `set` / `go`.
 9. **User-facing docs** — `--help` and `--list` text reflect the lifecycle.
 
-### Remaining
+### Remaining After v0.1.0
 
 10. **`undo` built-in** — reverses `.ready-set/changes/` records regardless
     of provider.
 11. **CI and release infrastructure** — pipeline + signed release binaries
     on tag push.
 
-### v0.1.0 acceptance gates
+### Release-readiness gates
 
-All must hold before publishing `0.1.0` (stable). Pre-release tags in the
-`0.1.0-alpha.*` / `0.1.0-beta.*` series may ship with subsets of these
-gates met; `undo` in particular lands in a later pre-release.
+These gates define the long-term release target for the dispatcher and
+first-party providers. `ready-set undo` is tracked as post-v0.1.0 work.
 
 - `ready-set ready` correctly classifies a fresh cargo workspace and the
   same workspace after `ready-set set` on Linux, macOS, and Windows.
@@ -819,8 +818,6 @@ gates met; `undo` in particular lands in a later pre-release.
   foundation files and writes change records under `rust`.
 - `ready-set go formatting` and `ready-set go linting` invoke the provider
   workflows and report failure correctly.
-- `ready-set undo` reverses all changes from `set` to a clean tree
-  (`git status` empty after `set` + `undo`).
 - A reference plugin (no SDK) declaring one capability participates in the
   matrix and answers `__ready` / `__set` correctly, exercising the env and
   lifecycle contracts.

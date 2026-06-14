@@ -27,6 +27,7 @@ the lifetime of `ready-set 0.x.y`.
 | [`ready-set-toml.md`](ready-set-toml.md) | `stable`                | Schema for the project-local `.ready-set.toml`.                                                                                                         |
 | [`exit-codes.md`](exit-codes.md)         | `stable`                | Process exit codes returned by every `ready-set` command (built-ins and plugins).                                                                       |
 | [`sdk-api.md`](sdk-api.md)               | `stable`                | Public Rust API surface of the `ready-set-sdk` crate at v0.1.0.                                                                                         |
+| [`plugin-blueprint.md`](plugin-blueprint.md) | `experimental`      | YAML blueprint consumed by `ready-set-plugin` to scaffold a plugin crate.                                                                               |
 | [`cache.md`](cache.md)                   | `experimental-internal` | Schema for the dispatcher's `--list` cache file.                                                                                                        |
 
 ## JSON Schemas
@@ -39,6 +40,8 @@ JSON Schema **Draft 2020-12** documents.
 | [`schemas/manifest.schema.json`](schemas/manifest.schema.json)           | TOML-decoded sidecar manifest objects.                        |
 | [`schemas/describe.schema.json`](schemas/describe.schema.json)           | One-line JSON output of `__describe`.                         |
 | [`schemas/capability-descriptor.schema.json`](schemas/capability-descriptor.schema.json) | Static metadata for one product capability.                   |
+| [`schemas/command-alias.schema.json`](schemas/command-alias.schema.json) | A provider-declared `ready-set <name>` command alias.         |
+| [`schemas/plugin-blueprint.schema.json`](schemas/plugin-blueprint.schema.json) | YAML-decoded `ready-set-plugin` blueprint objects.            |
 | [`schemas/capability-report.schema.json`](schemas/capability-report.schema.json) | Read-only readiness status for one product capability.        |
 | [`schemas/capability-run-report.schema.json`](schemas/capability-run-report.schema.json) | Structured result from running a capability lifecycle verb.   |
 | [`schemas/change-record.schema.json`](schemas/change-record.schema.json) | A single JSONL line in `.ready-set/changes/<plugin>-*.jsonl`. |

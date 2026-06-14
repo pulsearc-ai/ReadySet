@@ -22,6 +22,7 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
+pub mod aliases;
 pub mod builtins;
 pub mod cache;
 pub mod capabilities;
@@ -73,6 +74,9 @@ pub fn run(argv: impl IntoIterator<Item = OsString>) -> ExitCode {
             let contract = build_contract(&globals, &cwd);
             if let Some(handler) = builtins::route(&name) {
                 return handler(&args, &contract);
+            }
+            if let Some(alias) = aliases::resolve(&name, &args) {
+                return aliases::run(&alias, &args, &contract);
             }
             // Fall through to plugin discovery.
             let Some(entry) = discovery::find_plugin(&name) else {

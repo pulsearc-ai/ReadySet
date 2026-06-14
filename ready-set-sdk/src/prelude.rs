@@ -14,6 +14,7 @@ pub use crate::capability::{
     CapabilityRelevance, CapabilityReport, CapabilityRunReport, CapabilityState, CapabilityVerb,
     NextAction, ProviderId, RunStatus,
 };
+pub use crate::command_alias::{CommandAlias, CommandAliasTarget};
 pub use crate::context::{ColorMode, Context, LogLevel};
 pub use crate::error::{Error, Result};
 pub use crate::exit_code::ExitCode;

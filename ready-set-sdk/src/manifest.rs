@@ -1,14 +1,13 @@
 //! Plugin manifest sidecar parsing.
 //!
-//! See
-//! [`docs/contracts/manifest.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/manifest.md)
-//! for the source of truth.
+//! See `docs/contracts/manifest.md` for the source of truth.
 
 use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
 use crate::capability::CapabilityDescriptor;
+use crate::command_alias::CommandAlias;
 use crate::describe::{Platform, Stability};
 use crate::error::{Error, Result};
 
@@ -25,10 +24,14 @@ pub struct Manifest {
     pub min_dispatcher_version: semver::Version,
     /// Supported operating systems.
     pub platforms: Vec<Platform>,
-    /// Whether the plugin requires a cargo workspace context.
-    pub requires_cargo_workspace: bool,
+    /// Plugin-declared project requirements, such as `cargo-workspace`.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub project_requirements: Vec<String>,
     /// Product capabilities contributed by this plugin.
     pub capabilities: Vec<CapabilityDescriptor>,
+    /// User-facing `ready-set <name>` aliases contributed by this plugin.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub command_aliases: Vec<CommandAlias>,
 }
 
 impl Manifest {
@@ -76,6 +79,52 @@ impl Manifest {
                 "manifest platforms must list at least one OS",
             ));
         }
+        for requirement in &self.project_requirements {
+            if requirement.is_empty() {
+                return Err(Error::contract("manifest project requirement is empty"));
+            }
+            if requirement.contains(char::is_whitespace) {
+                return Err(Error::contract(format!(
+                    "manifest project requirement `{requirement}` contains whitespace"
+                )));
+            }
+        }
+        for alias in &self.command_aliases {
+            if alias.name.is_empty() {
+                return Err(Error::contract("manifest command alias name is empty"));
+            }
+            if alias.description.is_empty() {
+                return Err(Error::contract(format!(
+                    "manifest command alias `{}` description is empty",
+                    alias.name
+                )));
+            }
+            if alias.description.len() > 80 {
+                return Err(Error::contract(format!(
+                    "manifest command alias `{}` description is {} chars (max 80)",
+                    alias.name,
+                    alias.description.len()
+                )));
+            }
+            if alias.description.contains('\n') || alias.description.contains('\r') {
+                return Err(Error::contract(format!(
+                    "manifest command alias `{}` description must be a single line",
+                    alias.name
+                )));
+            }
+            if alias.name.contains(char::is_whitespace) {
+                return Err(Error::contract(format!(
+                    "manifest command alias `{}` contains whitespace",
+                    alias.name
+                )));
+            }
+            if alias.match_first_arg.as_ref().is_some_and(String::is_empty) {
+                return Err(Error::contract(format!(
+                    "manifest command alias `{}` match_first_arg is empty",
+                    alias.name
+                )));
+            }
+        }
         Ok(())
     }
 }
@@ -83,6 +132,7 @@ impl Manifest {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::command_alias::CommandAliasTarget;
 
     #[test]
     fn sibling_of_strips_extension() {
@@ -107,7 +157,6 @@ version                  = "0.1.0"
 stability                = "stable"
 min_dispatcher_version   = "0.1.0"
 platforms                = ["linux", "macos", "windows"]
-requires_cargo_workspace = false
 capabilities             = []
 "#;
         let m: Manifest = toml::from_str(toml_src).unwrap();
@@ -125,7 +174,6 @@ version                  = "0.1.0"
 stability                = "stable"
 min_dispatcher_version   = "0.1.0"
 platforms                = ["linux", "macos", "windows"]
-requires_cargo_workspace = false
 
 [[capabilities]]
 id = "linting"
@@ -141,14 +189,47 @@ default_relevance = "required"
     }
 
     #[test]
-    fn rejects_manifest_without_capabilities() {
+    fn parses_manifest_with_command_aliases() {
         let toml_src = r#"
 description              = "Reference plugin"
 version                  = "0.1.0"
 stability                = "stable"
 min_dispatcher_version   = "0.1.0"
 platforms                = ["linux", "macos", "windows"]
-requires_cargo_workspace = false
+capabilities             = []
+
+[[command_aliases]]
+name = "rotate"
+description = "Rotate due secrets"
+target = "go"
+capability = "rotation"
+
+[[command_aliases]]
+name = "encrypt"
+description = "Inspect secret bundles"
+match_first_arg = "bundle"
+target = "plugin"
+"#;
+        let m: Manifest = toml::from_str(toml_src).unwrap();
+        m.validate().unwrap();
+        assert_eq!(m.command_aliases.len(), 2);
+        assert!(matches!(
+            m.command_aliases[0].target,
+            CommandAliasTarget::Go { .. }
+        ));
+        assert_eq!(
+            m.command_aliases[1].match_first_arg.as_deref(),
+            Some("bundle")
+        );
+    }
+
+    #[test]
+    fn rejects_manifest_without_capabilities() {
+        let toml_src = r#"
+description              = "Reference plugin"
+version                  = "0.1.0"
+stability                = "stable"
+min_dispatcher_version   = "0.1.0"
 "#;
         assert!(toml::from_str::<Manifest>(toml_src).is_err());
     }
@@ -161,8 +242,9 @@ requires_cargo_workspace = false
             stability: Stability::Stable,
             min_dispatcher_version: semver::Version::new(0, 1, 0),
             platforms: vec![Platform::Linux],
-            requires_cargo_workspace: false,
+            project_requirements: Vec::new(),
             capabilities: Vec::new(),
+            command_aliases: Vec::new(),
         };
         assert!(m.validate().is_err());
         m.description = "ok".into();

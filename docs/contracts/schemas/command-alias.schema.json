@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ready-set.dev/schemas/command-alias.schema.json",
+  "title": "ready-set command alias",
+  "description": "A provider-declared `ready-set <name>` command contributed by a plugin.",
+  "type": "object",
+  "required": ["name", "description", "target"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "pattern": "^[^\\r\\n]+$"
+    },
+    "match_first_arg": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target": {
+      "type": "string",
+      "enum": ["set", "go", "plugin"]
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "target": { "const": "set" },
+        "capability": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+      },
+      "required": ["capability"]
+    },
+    {
+      "properties": {
+        "target": { "const": "go" },
+        "capability": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+      },
+      "required": ["capability"]
+    },
+    {
+      "properties": {
+        "target": { "const": "plugin" },
+        "args": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  ],
+  "unevaluatedProperties": false
+}

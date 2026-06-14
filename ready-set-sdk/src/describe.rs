@@ -1,8 +1,6 @@
 //! `__describe` subcommand support.
 //!
-//! See
-//! [`docs/contracts/describe.md`](https://github.com/pulsearc-ai/ReadySet/blob/main/docs/contracts/describe.md)
-//! for the source of truth.
+//! See `docs/contracts/describe.md` for the source of truth.
 
 use std::ffi::OsString;
 use std::io::Write;
@@ -10,6 +8,7 @@ use std::io::Write;
 use serde::{Deserialize, Serialize};
 
 use crate::capability::CapabilityDescriptor;
+use crate::command_alias::CommandAlias;
 use crate::error::{Error, Result};
 use crate::exit_code::ExitCode;
 
@@ -68,10 +67,14 @@ pub struct Describe {
     pub min_dispatcher_version: semver::Version,
     /// Supported operating systems.
     pub platforms: Vec<Platform>,
-    /// Whether the plugin requires a cargo workspace context.
-    pub requires_cargo_workspace: bool,
+    /// Plugin-declared project requirements, such as `cargo-workspace`.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub project_requirements: Vec<String>,
     /// Product capabilities contributed by this plugin.
     pub capabilities: Vec<CapabilityDescriptor>,
+    /// User-facing `ready-set <name>` aliases contributed by this plugin.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub command_aliases: Vec<CommandAlias>,
 }
 
 impl Describe {
@@ -137,8 +140,9 @@ mod tests {
             stability: Stability::Stable,
             min_dispatcher_version: semver::Version::new(0, 1, 0),
             platforms: vec![Platform::Linux, Platform::Macos, Platform::Windows],
-            requires_cargo_workspace: false,
+            project_requirements: Vec::new(),
             capabilities: Vec::new(),
+            command_aliases: Vec::new(),
         }
     }
 
@@ -182,7 +186,7 @@ mod tests {
 
     #[test]
     fn rejects_json_without_capabilities() {
-        let json = r#"{"description":"test","version":"0.1.0","stability":"stable","min_dispatcher_version":"0.1.0","platforms":["linux"],"requires_cargo_workspace":false}"#;
+        let json = r#"{"description":"test","version":"0.1.0","stability":"stable","min_dispatcher_version":"0.1.0","platforms":["linux"]}"#;
         assert!(serde_json::from_str::<Describe>(json).is_err());
     }
 }

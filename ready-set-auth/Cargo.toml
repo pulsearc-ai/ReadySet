@@ -1,0 +1,38 @@
+[package]
+name         = "ready-set-auth"
+version      = "0.1.0"
+edition.workspace      = true
+rust-version.workspace = true
+license.workspace      = true
+repository.workspace   = true
+description  = "Local auth readiness provider for ready-set."
+keywords     = ["ready-set", "auth", "oauth", "plugin"]
+categories   = ["command-line-utilities", "development-tools"]
+
+[lib]
+name = "ready_set_auth"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ready-set-auth"
+path = "src/main.rs"
+required-features = ["plugin"]
+
+[features]
+default = ["plugin"]
+plugin = ["dep:clap", "dep:ready-set-sdk", "dep:semver", "dep:serde", "dep:time", "dep:toml"]
+
+[dependencies]
+clap          = { workspace = true, optional = true }
+ready-set-sdk = { workspace = true, optional = true }
+semver        = { workspace = true, optional = true }
+serde         = { workspace = true, optional = true }
+time          = { workspace = true, optional = true }
+toml          = { workspace = true, optional = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+tempfile   = { workspace = true }
+
+[lints]
+workspace = true

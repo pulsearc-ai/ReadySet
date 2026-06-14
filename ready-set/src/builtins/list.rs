@@ -3,6 +3,7 @@
 //! Walks PATH, resolves metadata via the cache → sidecar → `__describe`
 //! waterfall, prints results in human or JSON.
 
+use std::collections::BTreeSet;
 use std::ffi::OsString;
 
 use ready_set_sdk::ExitCode;
@@ -77,6 +78,36 @@ pub fn run(args: &[OsString], contract: &EnvContract) -> ExitCode {
                     .collect()
             }),
         });
+        if let Some(m) = manifest.as_ref() {
+            let mut seen_aliases = BTreeSet::new();
+            for alias in &m.command_aliases {
+                if !seen_aliases.insert(alias.name.clone()) {
+                    continue;
+                }
+                rows.push(Row {
+                    kind: "alias",
+                    name: alias.name.clone(),
+                    description: Some(alias.description.clone()),
+                    version: Some(m.version.to_string()),
+                    stability: Some(match m.stability {
+                        ready_set_sdk::describe::Stability::Stable => "stable".into(),
+                        ready_set_sdk::describe::Stability::Experimental => "experimental".into(),
+                        ready_set_sdk::describe::Stability::Deprecated => "deprecated".into(),
+                    }),
+                    binary_path: Some(entry.binary_path.display().to_string()),
+                    platforms: Some(
+                        m.platforms
+                            .iter()
+                            .map(|p| match p {
+                                Platform::Linux => "linux".into(),
+                                Platform::Macos => "macos".into(),
+                                Platform::Windows => "windows".into(),
+                            })
+                            .collect(),
+                    ),
+                });
+            }
+        }
     }
 
     if cache_dirty && let Some(path) = cache_path.as_deref() {

@@ -11,7 +11,6 @@
     "stability",
     "min_dispatcher_version",
     "platforms",
-    "requires_cargo_workspace",
     "capabilities"
   ],
   "properties": {
@@ -42,13 +41,24 @@
         "enum": ["linux", "macos", "windows"]
       }
     },
-    "requires_cargo_workspace": {
-      "type": "boolean"
+    "project_requirements": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
     },
     "capabilities": {
       "type": "array",
       "items": {
         "$ref": "capability-descriptor.schema.json"
+      }
+    },
+    "command_aliases": {
+      "type": "array",
+      "items": {
+        "$ref": "command-alias.schema.json"
       }
     }
   }

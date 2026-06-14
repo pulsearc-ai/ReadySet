@@ -8,6 +8,7 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use serde::Deserialize;
+use serde::de::DeserializeOwned;
 
 use crate::capability::{CapabilityRelevance, ProviderId};
 use crate::error::{Error, Result};
@@ -42,15 +43,74 @@ pub struct Config {
     /// Per-capability configuration, keyed by capability id.
     pub capabilities: BTreeMap<String, CapabilityConfig>,
     /// Per-plugin sections, keyed by plugin name.
-    ///
-    /// The `toml::Value` exposure here leaks `toml = 0.8.x` semver into
-    /// the SDK's public API. Before `0.1.0` stable this will be wrapped
-    /// in an opaque `PluginSection` type so the underlying value
-    /// representation becomes a private implementation detail.
-    pub plugins: BTreeMap<String, toml::Value>,
+    pub plugins: BTreeMap<String, PluginSection>,
     /// Sections under `[ready-set]` not understood by this SDK version.
     /// Surfaces forward-compat warnings without crashing on extras.
     pub unknown_keys: Vec<String>,
+}
+
+/// Project-local configuration section owned by one plugin.
+#[derive(Debug, Clone)]
+pub struct PluginSection {
+    raw: toml::Value,
+}
+
+impl PluginSection {
+    /// Decode this plugin section into a typed config struct.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::TomlParse`] when the section cannot be deserialized into
+    /// `T`.
+    pub fn deserialize<T>(&self) -> Result<T>
+    where
+        T: DeserializeOwned,
+    {
+        self.raw.clone().try_into().map_err(Error::from)
+    }
+
+    /// Read a string field from this section.
+    #[must_use]
+    pub fn get_str(&self, key: &str) -> Option<&str> {
+        self.table()
+            .and_then(|table| table.get(key))
+            .and_then(toml::Value::as_str)
+    }
+
+    /// Read a boolean field from this section.
+    #[must_use]
+    pub fn get_bool(&self, key: &str) -> Option<bool> {
+        self.table()
+            .and_then(|table| table.get(key))
+            .and_then(toml::Value::as_bool)
+    }
+
+    /// Read an integer field from this section.
+    #[must_use]
+    pub fn get_integer(&self, key: &str) -> Option<i64> {
+        self.table()
+            .and_then(|table| table.get(key))
+            .and_then(toml::Value::as_integer)
+    }
+
+    /// Read a string array field from this section.
+    #[must_use]
+    pub fn get_string_array(&self, key: &str) -> Option<Vec<String>> {
+        self.table()
+            .and_then(|table| table.get(key))
+            .and_then(toml::Value::as_array)
+            .map(|items| {
+                items
+                    .iter()
+                    .filter_map(toml::Value::as_str)
+                    .map(str::to_owned)
+                    .collect()
+            })
+    }
+
+    fn table(&self) -> Option<&toml::map::Map<String, toml::Value>> {
+        self.raw.as_table()
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -144,11 +204,17 @@ pub fn parse_at(path: &Path) -> Result<Config> {
         })
         .collect();
 
+    let plugins = parsed
+        .rest
+        .into_iter()
+        .map(|(name, raw)| (name, PluginSection { raw }))
+        .collect();
+
     Ok(Config {
         path: path.to_path_buf(),
         ready_set,
         capabilities,
-        plugins: parsed.rest,
+        plugins,
         unknown_keys,
     })
 }
@@ -254,6 +320,11 @@ provider = "rust"
 
     #[test]
     fn captures_per_plugin_sections() {
+        #[derive(Debug, Deserialize)]
+        struct ScanConfig {
+            exclude: Vec<String>,
+        }
+
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join(".ready-set.toml");
         std::fs::write(
@@ -265,6 +336,13 @@ provider = "rust"
         let cfg = parse_at(&path).unwrap();
         assert!(cfg.plugins.contains_key("scan"));
         assert!(!cfg.plugins.contains_key("capabilities"));
+        let scan = cfg.plugins.get("scan").unwrap();
+        assert_eq!(
+            scan.get_string_array("exclude"),
+            Some(vec!["vendor/**".to_string()])
+        );
+        let decoded: ScanConfig = scan.deserialize().unwrap();
+        assert_eq!(decoded.exclude, vec!["vendor/**"]);
     }
 
     #[test]

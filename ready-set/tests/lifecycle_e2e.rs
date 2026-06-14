@@ -27,7 +27,16 @@ fn make_fake_plugin(dir: &Path) -> PathBuf {
         &bin,
         r#"#!/bin/sh
 if [ -n "$FAKE_LIFECYCLE_LOG" ]; then
-  printf '%s %s\n' "$1" "$2" >> "$FAKE_LIFECYCLE_LOG"
+  first=1
+  for arg in "$@"; do
+    if [ "$first" = "1" ]; then
+      printf '%s' "$arg" >> "$FAKE_LIFECYCLE_LOG"
+      first=0
+    else
+      printf '\t%s' "$arg" >> "$FAKE_LIFECYCLE_LOG"
+    fi
+  done
+  printf '\n' >> "$FAKE_LIFECYCLE_LOG"
 fi
 if [ "$1" = "__ready" ]; then
   if [ "$FAKE_READY_INVALID_JSON" = "1" ]; then
@@ -67,7 +76,6 @@ version                  = "0.1.0"
 stability                = "stable"
 min_dispatcher_version   = "0.1.0"
 platforms                = ["linux", "macos", "windows"]
-requires_cargo_workspace = false
 
 [[capabilities]]
 id = "formatting"
@@ -96,18 +104,24 @@ fn make_fake_go_plugin(dir: &Path) -> PathBuf {
         &bin,
         r#"#!/bin/sh
 if [ "$1" = "__go" ]; then
+  capability=$2
   if [ -n "$FAKE_GO_LOG" ]; then
-    printf '%s\n' "$2" >> "$FAKE_GO_LOG"
+    printf '%s' "$capability" >> "$FAKE_GO_LOG"
+    shift 2
+    for arg in "$@"; do
+      printf '\t%s' "$arg" >> "$FAKE_GO_LOG"
+    done
+    printf '\n' >> "$FAKE_GO_LOG"
   fi
   if [ "$FAKE_GO_INVALID_JSON" = "1" ]; then
     printf 'not json\n'
     exit 1
   fi
-  if [ "$2" = "formatting" ] && [ "$FAKE_GO_FAIL_FORMATTING" = "1" ]; then
+  if [ "$capability" = "formatting" ] && [ "$FAKE_GO_FAIL_FORMATTING" = "1" ]; then
     printf '{"id":"formatting","verb":"go","status":"failed","actions":[{"kind":"error","summary":"fake go failed"}]}\n'
     exit 1
   fi
-  printf '{"id":"%s","verb":"go","status":"ok","actions":[{"kind":"run","summary":"fake go %s"}]}\n' "$2" "$2"
+  printf '{"id":"%s","verb":"go","status":"ok","actions":[{"kind":"run","summary":"fake go %s"}]}\n' "$capability" "$capability"
   exit 0
 fi
 exit 1
@@ -124,7 +138,6 @@ version                  = "0.1.0"
 stability                = "stable"
 min_dispatcher_version   = "0.1.0"
 platforms                = ["linux", "macos", "windows"]
-requires_cargo_workspace = false
 
 [[capabilities]]
 id = "formatting"
@@ -180,7 +193,6 @@ version                  = "0.1.0"
 stability                = "stable"
 min_dispatcher_version   = "0.1.0"
 platforms                = ["linux", "macos", "windows"]
-requires_cargo_workspace = false
 
 [[capabilities]]
 id = "setup-only"
@@ -209,7 +221,7 @@ fn make_fake_describe_plugin(dir: &Path) -> PathBuf {
         &bin,
         r#"#!/bin/sh
 if [ "$1" = "__describe" ]; then
-  printf '{"description":"Describe provider","version":"0.1.0","stability":"stable","min_dispatcher_version":"0.1.0","platforms":["linux","macos","windows"],"requires_cargo_workspace":false,"capabilities":[{"id":"described","title":"Described","provider":"described","verbs":["ready"],"default_relevance":"required"}]}\n'
+  printf '{"description":"Describe provider","version":"0.1.0","stability":"stable","min_dispatcher_version":"0.1.0","platforms":["linux","macos","windows"],"capabilities":[{"id":"described","title":"Described","provider":"described","verbs":["ready"],"default_relevance":"required"}]}\n'
   exit 0
 fi
 if [ "$1" = "__ready" ]; then
@@ -269,7 +281,6 @@ version                  = "0.1.0"
 stability                = "stable"
 min_dispatcher_version   = "0.1.0"
 platforms                = ["linux", "macos", "windows"]
-requires_cargo_workspace = false
 
 [[capabilities]]
 id = "envcheck"
@@ -286,6 +297,94 @@ default_relevance = "required"
 fn fake_env_path() -> tempfile::TempDir {
     let dir = tempfile::tempdir().unwrap();
     drop(make_fake_env_plugin(dir.path()));
+    dir
+}
+
+#[cfg(unix)]
+fn make_fake_encrypt_plugin(dir: &Path) -> PathBuf {
+    use std::os::unix::fs::PermissionsExt;
+
+    let bin = dir.join("ready-set-encrypt");
+    write(
+        &bin,
+        r#"#!/bin/sh
+cmd=$1
+capability=$2
+if [ -n "$FAKE_ENCRYPT_LOG" ]; then
+  printf '%s' "$cmd" >> "$FAKE_ENCRYPT_LOG"
+  shift
+  for arg in "$@"; do
+    printf '\t%s' "$arg" >> "$FAKE_ENCRYPT_LOG"
+  done
+  printf '\n' >> "$FAKE_ENCRYPT_LOG"
+fi
+if [ "$cmd" = "__go" ]; then
+  printf '{"id":"%s","verb":"go","status":"ok","actions":[{"kind":"run","summary":"fake go %s"}]}\n' "$capability" "$capability"
+  exit 0
+fi
+if [ "$cmd" = "__set" ]; then
+  printf '{"id":"%s","verb":"set","status":"changed","actions":[{"kind":"check","summary":"fake set %s"}]}\n' "$capability" "$capability"
+  exit 0
+fi
+if [ "$cmd" = "bundle" ]; then
+  printf 'fake bundle %s\n' "$capability"
+  exit 0
+fi
+exit 1
+"#,
+    );
+    let mut perms = std::fs::metadata(&bin).unwrap().permissions();
+    perms.set_mode(0o755);
+    std::fs::set_permissions(&bin, perms).unwrap();
+    write(
+        &dir.join("ready-set-encrypt.toml"),
+        r#"
+description              = "Fake encrypt provider"
+version                  = "0.1.0"
+stability                = "stable"
+min_dispatcher_version   = "0.1.0"
+platforms                = ["linux", "macos", "windows"]
+
+[[capabilities]]
+id = "rotation"
+title = "Rotation"
+provider = "encrypt"
+verbs = ["ready", "go"]
+default_relevance = "required"
+
+[[capabilities]]
+id = "secret-bundles"
+title = "Secret Bundles"
+provider = "encrypt"
+verbs = ["ready", "set", "go"]
+default_relevance = "required"
+
+[[command_aliases]]
+name = "encrypt"
+description = "Inspect and operate on ReadySet secret bundles."
+match_first_arg = "bundle"
+target = "plugin"
+
+[[command_aliases]]
+name = "encrypt"
+description = "Encrypt configured dotenv files into ReadySet secret bundles."
+target = "set"
+capability = "secret-bundles"
+
+[[command_aliases]]
+name = "rotate"
+description = "Rotate or record reminders for due secrets."
+target = "go"
+capability = "rotation"
+"#,
+    );
+    bin
+}
+
+#[cfg(unix)]
+fn fake_encrypt_path() -> tempfile::TempDir {
+    let dir = tempfile::tempdir().unwrap();
+    drop(make_fake_encrypt_plugin(dir.path()));
     dir
 }
 
@@ -366,6 +465,57 @@ fn set_json_invokes_provider_set() {
 
 #[cfg(unix)]
 #[test]
+fn set_forwards_provider_args_after_separator() {
+    let bin_dir = fake_path();
+    let work = tempfile::tempdir().unwrap();
+    let log = work.path().join("lifecycle.log");
+    let out = Command::new(dispatcher())
+        .args([
+            "--json",
+            "set",
+            "formatting",
+            "--dry-run",
+            "--",
+            "--no-discover",
+            "--member",
+            "crates/foo",
+        ])
+        .env("PATH", bin_dir.path())
+        .env("FAKE_LIFECYCLE_LOG", &log)
+        .current_dir(work.path())
+        .output()
+        .unwrap();
+
+    assert!(
+        out.status.success(),
+        "stdout: {}\nstderr: {}",
+        String::from_utf8_lossy(&out.stdout),
+        String::from_utf8_lossy(&out.stderr)
+    );
+    assert_eq!(
+        std::fs::read_to_string(log).unwrap(),
+        "__set\tformatting\t--dry-run\t--no-discover\t--member\tcrates/foo\n"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn set_rejects_provider_args_without_explicit_capability() {
+    let work = tempfile::tempdir().unwrap();
+    let out = Command::new(dispatcher())
+        .args(["set", "--", "--member", "crates/foo"])
+        .env("PATH", "")
+        .current_dir(work.path())
+        .output()
+        .unwrap();
+
+    assert_eq!(out.status.code(), Some(1));
+    let stderr = String::from_utf8(out.stderr).unwrap();
+    assert!(stderr.contains("provider arguments after `--` require an explicit capability"));
+}
+
+#[cfg(unix)]
+#[test]
 fn go_json_invokes_provider_go() {
     let bin_dir = fake_go_path();
     let work = tempfile::tempdir().unwrap();
@@ -384,6 +534,145 @@ fn go_json_invokes_provider_go() {
     assert_eq!(parsed[0].id.as_str(), "formatting");
     assert_eq!(parsed[0].verb, ready_set_sdk::CapabilityVerb::Go);
     assert_eq!(parsed[0].status, ready_set_sdk::RunStatus::Ok);
+}
+
+#[cfg(unix)]
+#[test]
+fn go_forwards_provider_args_after_separator() {
+    let bin_dir = fake_go_path();
+    let work = tempfile::tempdir().unwrap();
+    let log = work.path().join("go.log");
+    let out = Command::new(dispatcher())
+        .args([
+            "--json",
+            "go",
+            "formatting",
+            "--",
+            "smoke",
+            "--seed",
+            "https://example.com/",
+        ])
+        .env("PATH", bin_dir.path())
+        .env("FAKE_GO_LOG", &log)
+        .current_dir(work.path())
+        .output()
+        .unwrap();
+
+    assert!(
+        out.status.success(),
+        "stdout: {}\nstderr: {}",
+        String::from_utf8_lossy(&out.stdout),
+        String::from_utf8_lossy(&out.stderr)
+    );
+    assert_eq!(
+        std::fs::read_to_string(log).unwrap(),
+        "formatting\tsmoke\t--seed\thttps://example.com/\n"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn go_rejects_provider_args_without_explicit_capability() {
+    let work = tempfile::tempdir().unwrap();
+    let out = Command::new(dispatcher())
+        .args(["go", "--", "smoke"])
+        .env("PATH", "")
+        .current_dir(work.path())
+        .output()
+        .unwrap();
+
+    assert_eq!(out.status.code(), Some(1));
+    let stderr = String::from_utf8(out.stderr).unwrap();
+    assert!(stderr.contains("provider arguments after `--` require an explicit capability"));
+}
+
+#[cfg(unix)]
+#[test]
+fn rotate_alias_invokes_encrypt_provider_rotation() {
+    let bin_dir = fake_encrypt_path();
+    let work = tempfile::tempdir().unwrap();
+    let log = work.path().join("encrypt.log");
+    let out = Command::new(dispatcher())
+        .args(["--json", "rotate", "--name", "API_KEY", "--confirm"])
+        .env("PATH", bin_dir.path())
+        .env("FAKE_ENCRYPT_LOG", &log)
+        .current_dir(work.path())
+        .output()
+        .unwrap();
+
+    assert!(
+        out.status.success(),
+        "stdout: {}\nstderr: {}",
+        String::from_utf8_lossy(&out.stdout),
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let report: ready_set_sdk::CapabilityRunReport =
+        serde_json::from_str(String::from_utf8(out.stdout).unwrap().trim()).unwrap();
+    assert_eq!(report.id.as_str(), "rotation");
+    assert_eq!(
+        std::fs::read_to_string(log).unwrap(),
+        "__go\trotation\t--name\tAPI_KEY\t--confirm\n"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn encrypt_alias_invokes_secret_bundles_set() {
+    let bin_dir = fake_encrypt_path();
+    let work = tempfile::tempdir().unwrap();
+    let log = work.path().join("encrypt.log");
+    let out = Command::new(dispatcher())
+        .args(["--json", "encrypt", "--dry-run"])
+        .env("PATH", bin_dir.path())
+        .env("FAKE_ENCRYPT_LOG", &log)
+        .current_dir(work.path())
+        .output()
+        .unwrap();
+
+    assert!(
+        out.status.success(),
+        "stdout: {}\nstderr: {}",
+        String::from_utf8_lossy(&out.stdout),
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let report: ready_set_sdk::CapabilityRunReport =
+        serde_json::from_str(String::from_utf8(out.stdout).unwrap().trim()).unwrap();
+    assert_eq!(report.id.as_str(), "secret-bundles");
+    assert_eq!(
+        std::fs::read_to_string(log).unwrap(),
+        "__set\tsecret-bundles\t--dry-run\n"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn encrypt_bundle_alias_dispatches_direct_bundle_cli() {
+    let bin_dir = fake_encrypt_path();
+    let work = tempfile::tempdir().unwrap();
+    let log = work.path().join("encrypt.log");
+    let out = Command::new(dispatcher())
+        .args([
+            "encrypt",
+            "bundle",
+            "inspect",
+            "deploy/secrets/root.env.rsb",
+        ])
+        .env("PATH", bin_dir.path())
+        .env("FAKE_ENCRYPT_LOG", &log)
+        .current_dir(work.path())
+        .output()
+        .unwrap();
+
+    assert!(
+        out.status.success(),
+        "stdout: {}\nstderr: {}",
+        String::from_utf8_lossy(&out.stdout),
+        String::from_utf8_lossy(&out.stderr)
+    );
+    assert_eq!(
+        std::fs::read_to_string(log).unwrap(),
+        "bundle\tinspect\tdeploy/secrets/root.env.rsb\n"
+    );
 }
 
 #[cfg(unix)]

@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ready-set.dev/schemas/plugin-blueprint.schema.json",
+  "title": "ready-set plugin blueprint",
+  "description": "YAML blueprint consumed by ready-set-plugin to scaffold a plugin crate.",
+  "type": "object",
+  "required": ["schema_version", "plugin"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "plugin": { "$ref": "#/$defs/plugin" },
+    "capabilities": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/capability" }
+    },
+    "aliases": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/alias" }
+    },
+    "config": { "$ref": "#/$defs/config" },
+    "dependencies": { "$ref": "#/$defs/dependencies" },
+    "generation": { "$ref": "#/$defs/generation" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "plugin": {
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "version",
+        "stability",
+        "min_dispatcher_version"
+      ],
+      "properties": {
+        "name": { "$ref": "#/$defs/name" },
+        "crate_name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]*$"
+        },
+        "binary_name": {
+          "type": "string",
+          "pattern": "^ready-set-[a-z][a-z0-9-]*$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "^[^\\r\\n]+$"
+        },
+        "version": { "type": "string", "minLength": 1 },
+        "stability": { "$ref": "#/$defs/stability" },
+        "min_dispatcher_version": { "type": "string", "minLength": 1 },
+        "platforms": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/platform" },
+          "uniqueItems": true
+        },
+        "project_requirements": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "capability": {
+      "type": "object",
+      "required": ["id", "title", "verbs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/name" },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[^\\r\\n]+$"
+        },
+        "default_relevance": { "$ref": "#/$defs/relevance" },
+        "verbs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/verb" },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "ready": { "$ref": "#/$defs/ready" },
+        "set": { "$ref": "#/$defs/run" },
+        "go": { "$ref": "#/$defs/run" }
+      },
+      "additionalProperties": false
+    },
+    "ready": {
+      "type": "object",
+      "properties": {
+        "summary_ready": { "type": "string" },
+        "summary_missing": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "run": {
+      "type": "object",
+      "properties": {
+        "accepts_args": { "type": "boolean" },
+        "human_success": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "alias": {
+      "type": "object",
+      "required": ["name", "description", "target"],
+      "properties": {
+        "name": { "$ref": "#/$defs/name" },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[^\\r\\n]+$"
+        },
+        "match_first_arg": { "type": "string", "minLength": 1 },
+        "target": {
+          "type": "string",
+          "enum": ["set", "go", "plugin"]
+        },
+        "capability": { "$ref": "#/$defs/name" },
+        "args": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "target": { "enum": ["set", "go"] } },
+            "required": ["target"]
+          },
+          "then": { "required": ["capability"] }
+        },
+        {
+          "if": {
+            "properties": { "target": { "const": "plugin" } },
+            "required": ["target"]
+          },
+          "then": {
+            "not": { "required": ["capability"] }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "config": {
+      "type": "object",
+      "properties": {
+        "section": { "$ref": "#/$defs/name" },
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/config_field" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "config_field": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["bool", "string", "integer", "array_string"]
+        },
+        "default": true
+      },
+      "additionalProperties": false
+    },
+    "dependencies": {
+      "type": "object",
+      "properties": {
+        "external_tools": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "network": { "type": "boolean" },
+        "writes_files": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "generation": {
+      "type": "object",
+      "properties": {
+        "license": { "type": "string", "minLength": 1 },
+        "include_readme": { "type": "boolean" },
+        "include_contract_tests": { "type": "boolean" },
+        "include_github_ci": { "type": "boolean" },
+        "include_sidecar_manifest": { "type": "boolean" },
+        "sdk_version": { "type": "string", "minLength": 1 },
+        "sdk_path": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "stability": {
+      "type": "string",
+      "enum": ["stable", "experimental", "deprecated"]
+    },
+    "platform": {
+      "type": "string",
+      "enum": ["linux", "macos", "windows"]
+    },
+    "relevance": {
+      "type": "string",
+      "enum": ["required", "optional", "not-needed"]
+    },
+    "verb": {
+      "type": "string",
+      "enum": ["ready", "set", "go"]
+    }
+  }
+}

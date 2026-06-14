@@ -17,8 +17,9 @@ fn describe() -> Describe {
         stability: Stability::Experimental,
         min_dispatcher_version: "0.1.0".parse().unwrap(),
         platforms: vec![Platform::Linux, Platform::Macos, Platform::Windows],
-        requires_cargo_workspace: false,
+        project_requirements: Vec::new(),
         capabilities: Vec::new(),
+        command_aliases: Vec::new(),
     }
 }
 

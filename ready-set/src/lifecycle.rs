@@ -245,7 +245,7 @@ fn exit_code_from_status(status: ExitStatus) -> ExitCode {
             1 => ExitCode::UserError,
             2 => ExitCode::SystemError,
             3 => ExitCode::DependencyMissing,
-            4 => ExitCode::NotCargoWorkspace,
+            4 => ExitCode::ProjectRequirementMissing,
             5 => ExitCode::ContractViolation,
             127 => ExitCode::UnknownSubcommand,
             _ => ExitCode::SystemError,
@@ -297,7 +297,7 @@ mod tests {
         );
         assert_eq!(
             exit_code_from_status(exited(4)),
-            ExitCode::NotCargoWorkspace
+            ExitCode::ProjectRequirementMissing
         );
         assert_eq!(
             exit_code_from_status(exited(5)),

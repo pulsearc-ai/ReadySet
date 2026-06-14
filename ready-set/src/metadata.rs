@@ -17,8 +17,14 @@ use ready_set_sdk::manifest::Manifest;
 use crate::cache::{CacheKey, PluginCache};
 use crate::discovery::PluginEntry;
 
-const DESCRIBE_TIMEOUT: Duration = Duration::from_millis(100);
-const POLL_INTERVAL: Duration = Duration::from_millis(2);
+// Hard upper bound on how long the dispatcher will wait for a plugin's
+// `__describe` to print its single JSON line. The plugin spec itself says
+// "complete in <= 100 ms", but real-world spawn cost under heavy system load
+// (CI, parallel `cargo test`, cold disk) easily exceeds 100 ms; the child
+// process startup alone can take 50-200 ms on macOS. One second gives
+// realistic slack while still being fast in interactive use.
+const DESCRIBE_TIMEOUT: Duration = Duration::from_secs(1);
+const POLL_INTERVAL: Duration = Duration::from_millis(5);
 
 /// Resolve metadata for `entry` using cache → sidecar → `__describe`.
 ///

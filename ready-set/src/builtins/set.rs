@@ -40,13 +40,9 @@ struct Options {
     #[arg(long)]
     pub verbose: bool,
 
-    /// Explicit member path to add to `[workspace.members]`. Repeatable.
-    #[arg(long = "member")]
-    pub members: Vec<String>,
-
-    /// Skip recursive crate discovery.
-    #[arg(long)]
-    pub no_discover: bool,
+    /// Provider-specific arguments forwarded after `--`.
+    #[arg(last = true, allow_hyphen_values = true)]
+    pub provider_args: Vec<OsString>,
 }
 
 /// Built-in entry point. The dispatcher routes here for `ready-set set`.
@@ -58,6 +54,10 @@ pub fn run(args: &[OsString], contract: &EnvContract) -> ExitCode {
             return ExitCode::UserError;
         },
     };
+    if opts.capability.is_none() && !opts.provider_args.is_empty() {
+        eprintln!("ready-set set: provider arguments after `--` require an explicit capability");
+        return ExitCode::UserError;
+    }
     let cwd = match std::env::current_dir() {
         Ok(cwd) => cwd,
         Err(err) => {
@@ -175,13 +175,7 @@ fn provider_args(opts: &Options) -> Vec<OsString> {
     if opts.force {
         args.push(OsString::from("--force"));
     }
-    if opts.no_discover {
-        args.push(OsString::from("--no-discover"));
-    }
-    for member in &opts.members {
-        args.push(OsString::from("--member"));
-        args.push(OsString::from(member));
-    }
+    args.extend(opts.provider_args.iter().cloned());
     args
 }
 
@@ -203,7 +197,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn provider_args_preserve_setup_flags() {
+    fn provider_args_preserve_generic_and_passthrough_flags() {
         let opts = Options {
             capability: Some("workspace".into()),
             force: true,
@@ -211,8 +205,11 @@ mod tests {
             json: false,
             quiet: false,
             verbose: false,
-            members: vec!["crates/foo".into()],
-            no_discover: true,
+            provider_args: vec![
+                OsString::from("--no-discover"),
+                OsString::from("--member"),
+                OsString::from("crates/foo"),
+            ],
         };
 
         assert_eq!(
@@ -235,7 +232,8 @@ mod tests {
             stability: ready_set_sdk::describe::Stability::Stable,
             min_dispatcher_version: "0.1.0".parse().unwrap(),
             platforms: vec![ready_set_sdk::describe::Platform::current().unwrap()],
-            requires_cargo_workspace: false,
+            project_requirements: Vec::new(),
+            command_aliases: Vec::new(),
             capabilities: vec![
                 ready_set_sdk::CapabilityDescriptor {
                     id: "required".into(),
@@ -268,7 +266,8 @@ mod tests {
             stability: ready_set_sdk::describe::Stability::Stable,
             min_dispatcher_version: "0.1.0".parse().unwrap(),
             platforms: vec![ready_set_sdk::describe::Platform::current().unwrap()],
-            requires_cargo_workspace: false,
+            project_requirements: Vec::new(),
+            command_aliases: Vec::new(),
             capabilities: vec![ready_set_sdk::CapabilityDescriptor {
                 id: "ready-only".into(),
                 title: "Ready only".into(),

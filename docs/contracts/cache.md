@@ -36,7 +36,6 @@ convention exactly.
         "stability": "stable",
         "min_dispatcher_version": "0.1.0",
         "platforms": ["linux", "macos", "windows"],
-        "requires_cargo_workspace": false,
         "capabilities": []
       },
       "cached_at": "2026-05-10T15:04:05Z"

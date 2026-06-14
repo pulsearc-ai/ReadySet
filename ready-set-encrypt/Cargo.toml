@@ -1,0 +1,53 @@
+[package]
+name         = "ready-set-encrypt"
+version      = "0.1.0"
+edition.workspace      = true
+rust-version.workspace = true
+license.workspace      = true
+repository.workspace   = true
+description  = "Secrets capability provider plugin for ready-set."
+keywords     = ["ready-set", "secrets", "plugin"]
+categories   = ["command-line-utilities", "development-tools"]
+
+[[bin]]
+name = "ready-set-encrypt"
+path = "src/main.rs"
+
+# AppContainer launcher — Windows-only. Plugin's `sandbox::wrap` on
+# Windows returns argv prefixed by this binary, which then sets up the
+# AppContainer SID + per-path ACL grants and spawns the child via
+# `CreateProcessW` with `STARTUPINFOEXW.SECURITY_CAPABILITIES`. Only the
+# launcher uses Win32 FFI directly; everything else stays safe Rust.
+[[bin]]
+name              = "ready-set-encrypt-launcher"
+path              = "src/bin/launcher.rs"
+required-features = []
+
+[dependencies]
+ready-set-sdk    = { workspace = true }
+aes-gcm          = { workspace = true }
+base64           = { workspace = true }
+chacha20poly1305 = { workspace = true }
+clap             = { workspace = true }
+directories      = { workspace = true }
+getrandom        = { workspace = true }
+regex            = { workspace = true }
+semver           = { workspace = true }
+serde            = { workspace = true }
+serde_json       = { workspace = true }
+sha2             = { workspace = true }
+tempfile         = { workspace = true }
+thiserror        = { workspace = true }
+time             = { workspace = true }
+toml             = { workspace = true }
+toml_edit        = { workspace = true }
+ureq             = { workspace = true }
+walkdir          = { workspace = true }
+which            = { workspace = true }
+zeroize          = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+
+[lints]
+workspace = true

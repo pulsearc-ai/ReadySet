@@ -19,8 +19,8 @@ pub enum ExitCode {
     SystemError,
     /// A required external tool was not found on PATH.
     DependencyMissing,
-    /// A command requiring a cargo workspace was invoked outside one.
-    NotCargoWorkspace,
+    /// A plugin-declared project requirement was not satisfied.
+    ProjectRequirementMissing,
     /// A plugin violated the dispatcher↔plugin contract.
     ContractViolation,
     /// The dispatcher could not resolve the requested subcommand.
@@ -44,7 +44,7 @@ impl ExitCode {
             Self::UserError => 1,
             Self::SystemError => 2,
             Self::DependencyMissing => 3,
-            Self::NotCargoWorkspace => 4,
+            Self::ProjectRequirementMissing => 4,
             Self::ContractViolation => 5,
             Self::UnknownSubcommand => 127,
             Self::Signaled(n) => 128_u8.saturating_add(n),
@@ -82,7 +82,7 @@ mod tests {
         assert_eq!(ExitCode::UserError.as_u8(), 1);
         assert_eq!(ExitCode::SystemError.as_u8(), 2);
         assert_eq!(ExitCode::DependencyMissing.as_u8(), 3);
-        assert_eq!(ExitCode::NotCargoWorkspace.as_u8(), 4);
+        assert_eq!(ExitCode::ProjectRequirementMissing.as_u8(), 4);
         assert_eq!(ExitCode::ContractViolation.as_u8(), 5);
         assert_eq!(ExitCode::UnknownSubcommand.as_u8(), 127);
         assert_eq!(ExitCode::Signaled(0).as_u8(), 128);
