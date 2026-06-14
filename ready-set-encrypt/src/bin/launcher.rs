@@ -98,7 +98,7 @@ mod windows_main {
         cache: PathBuf,
         extra_writes: Vec<PathBuf>,
         container_name: String,
-        /// Everything after the final `--`. argv[0] is the executable.
+        /// Everything after the final `--`. `argv[0]` is the executable.
         child_argv: Vec<OsString>,
     }
 
