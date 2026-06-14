@@ -981,6 +981,7 @@ fn restrict_user_only(path: &Path) -> Result<()> {
 }
 
 #[cfg(not(unix))]
+#[allow(clippy::missing_const_for_fn, clippy::unnecessary_wraps)]
 fn restrict_user_only(_path: &Path) -> Result<()> {
     Ok(())
 }

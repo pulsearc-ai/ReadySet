@@ -148,7 +148,7 @@ use macos::{PLATFORM_LABEL, render_profile};
 
 #[cfg(target_os = "linux")]
 mod linux {
-    use super::{Error, PathBuf, Result, SandboxConfig, WrapResult, expand_tilde, home_dir};
+    use super::{Error, Result, SandboxConfig, WrapResult, expand_tilde, home_dir};
 
     /// Stable label written to audit entries identifying the Linux backend.
     pub const PLATFORM_LABEL: &str = "linux-bwrap";
@@ -181,47 +181,44 @@ mod linux {
     ///
     /// Strategy: `--ro-bind /` mounts the whole host root read-only inside
     /// the sandbox, then per-path `--bind` overlays add writable holes for
-    /// project_root, tmpdir, ~/.cache, and `extra_write_paths`. This gives
+    /// `project_root`, `tmpdir`, `~/.cache`, and `extra_write_paths`. This gives
     /// us default-deny-for-writes without an explicit denylist — the macOS
     /// profile's `(deny file-write* ~/.ssh ...)` is implicit on Linux
     /// because the base mount is read-only.
     #[must_use]
     pub fn render_bwrap_args(config: &SandboxConfig) -> Vec<String> {
-        let mut argv: Vec<String> = Vec::new();
-        argv.push("bwrap".into());
-        // Tear down the sandbox if the dispatcher dies.
-        argv.push("--die-with-parent".into());
-        // Network is allowed by default (provider CLIs need outbound HTTPS).
-        // Use --unshare-pid for process isolation but NOT --unshare-net.
-        argv.push("--unshare-pid".into());
-        // Read-only host root as the base layer.
-        argv.push("--ro-bind".into());
-        argv.push("/".into());
-        argv.push("/".into());
+        let mut argv: Vec<String> = vec![
+            "bwrap".into(),
+            // Tear down the sandbox if the dispatcher dies.
+            "--die-with-parent".into(),
+            // Network is allowed by default (provider CLIs need outbound HTTPS).
+            // Use --unshare-pid for process isolation but NOT --unshare-net.
+            "--unshare-pid".into(),
+            // Read-only host root as the base layer.
+            "--ro-bind".into(),
+            "/".into(),
+            "/".into(),
+        ];
         // Per-path writable overlays.
         let home = home_dir().display().to_string();
         let project_root = config.project_root.display().to_string();
         let tmpdir = std::env::temp_dir().display().to_string();
         for p in [&project_root, &tmpdir] {
-            argv.push("--bind".into());
-            argv.push(p.clone());
-            argv.push(p.clone());
+            argv.extend(["--bind".to_owned(), p.clone(), p.clone()]);
         }
         let cache_dir = format!("{home}/.cache");
-        argv.push("--bind".into());
-        argv.push(cache_dir.clone());
-        argv.push(cache_dir);
+        argv.extend(["--bind".to_owned(), cache_dir.clone(), cache_dir]);
         for extra in &config.extra_write_paths {
             let expanded = expand_tilde(extra, &home);
-            argv.push("--bind".into());
-            argv.push(expanded.clone());
-            argv.push(expanded);
+            argv.extend(["--bind".to_owned(), expanded.clone(), expanded]);
         }
         // Minimal /dev and /proc.
-        argv.push("--dev".into());
-        argv.push("/dev".into());
-        argv.push("--proc".into());
-        argv.push("/proc".into());
+        argv.extend([
+            "--dev".into(),
+            "/dev".into(),
+            "--proc".into(),
+            "/proc".into(),
+        ]);
         argv
     }
 }
@@ -235,7 +232,7 @@ use linux::render_bwrap_args;
 
 #[cfg(target_os = "windows")]
 mod windows {
-    use super::{Error, PathBuf, Result, SandboxConfig, WrapResult, expand_tilde, home_dir};
+    use super::{Error, Path, Result, SandboxConfig, WrapResult, expand_tilde, home_dir};
 
     /// Stable label written to audit entries identifying the Windows backend.
     pub const PLATFORM_LABEL: &str = "windows-appcontainer";
@@ -275,18 +272,19 @@ mod windows {
     /// per-path write ACLs, and spawns the child via `CreateProcessW`
     /// with `STARTUPINFOEXW` carrying `SECURITY_CAPABILITIES`.
     #[must_use]
-    pub fn render_launcher_args(launcher: &PathBuf, config: &SandboxConfig) -> Vec<String> {
-        let mut argv: Vec<String> = Vec::new();
-        argv.push(launcher.display().to_string());
+    pub fn render_launcher_args(launcher: &Path, config: &SandboxConfig) -> Vec<String> {
         let home = home_dir().display().to_string();
         let project_root = config.project_root.display().to_string();
         let tmpdir = std::env::temp_dir().display().to_string();
-        argv.push("--project-root".into());
-        argv.push(project_root);
-        argv.push("--tmpdir".into());
-        argv.push(tmpdir);
-        argv.push("--cache".into());
-        argv.push(format!("{home}\\AppData\\Local\\Cache"));
+        let mut argv: Vec<String> = vec![
+            launcher.display().to_string(),
+            "--project-root".into(),
+            project_root,
+            "--tmpdir".into(),
+            tmpdir,
+            "--cache".into(),
+            format!("{home}\\AppData\\Local\\Cache"),
+        ];
         for extra in &config.extra_write_paths {
             argv.push("--extra-write".into());
             argv.push(expand_tilde(extra, &home));
@@ -299,7 +297,7 @@ mod windows {
     /// Stable `AppContainer` profile name derived from the project root.
     /// Re-derivable by anyone with the same root path; idempotent across
     /// rotations of the same secret.
-    fn container_name(project_root: &std::path::Path) -> String {
+    fn container_name(project_root: &Path) -> String {
         use ready_set_sdk::fs::sha256_bytes;
         let key = project_root.display().to_string();
         let hash = sha256_bytes(key.as_bytes());
@@ -309,9 +307,6 @@ mod windows {
         format!("ready-set-encrypt.{}", &hash[..32])
     }
 }
-
-#[cfg(all(test, target_os = "windows"))]
-use windows::render_launcher_args;
 
 // ---------------------------------------------------------------------------
 // Shared helpers

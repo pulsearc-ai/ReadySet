@@ -72,21 +72,22 @@ fn main() -> std::process::ExitCode {
 #[cfg(target_os = "windows")]
 mod windows_main {
     use std::ffi::OsString;
+    use std::mem::size_of;
     use std::os::windows::ffi::OsStrExt;
-    use std::path::PathBuf;
+    use std::path::{Path, PathBuf};
     use std::ptr;
 
     use ready_set_encrypt::win_ffi::{
-        BOOL, CloseHandle, ConvertSidToStringSidW, CreateAppContainerProfile, CreateProcessW,
-        DACL_SECURITY_INFORMATION, DWORD, DeleteProcThreadAttributeList,
-        DeriveAppContainerSidFromAppContainerName, EXPLICIT_ACCESS_W, EXTENDED_STARTUPINFO_PRESENT,
-        FILE_ALL_ACCESS, GRANT_ACCESS, GetExitCodeProcess, GetNamedSecurityInfoW, HANDLE, INFINITE,
+        CloseHandle, CreateAppContainerProfile, CreateProcessW, DACL_SECURITY_INFORMATION, DWORD,
+        DeleteProcThreadAttributeList, DeriveAppContainerSidFromAppContainerName,
+        EXPLICIT_ACCESS_W, EXTENDED_STARTUPINFO_PRESENT, FILE_ALL_ACCESS, GRANT_ACCESS,
+        GetExitCodeProcess, GetNamedSecurityInfoW, HANDLE, INFINITE,
         InitializeProcThreadAttributeList, LPPROC_THREAD_ATTRIBUTE_LIST, LPSECURITY_ATTRIBUTES,
-        LPSTARTUPINFOEXW, LPWSTR, LocalFree, NO_INHERITANCE, NO_MULTIPLE_TRUSTEE,
-        PROC_THREAD_ATTRIBUTE_SECURITY_CAPABILITIES, PROCESS_INFORMATION, PSID, SE_FILE_OBJECT,
-        SECURITY_CAPABILITIES, STARTUPINFOEXW, STARTUPINFOW, SUB_CONTAINERS_AND_OBJECTS_INHERIT,
-        SetEntriesInAclW, SetNamedSecurityInfoW, TRUSTEE_IS_SID, TRUSTEE_IS_WELL_KNOWN_GROUP,
-        TRUSTEE_W, UpdateProcThreadAttribute, WAIT_OBJECT_0, WaitForSingleObject,
+        LPWSTR, LocalFree, NO_MULTIPLE_TRUSTEE, PROC_THREAD_ATTRIBUTE_SECURITY_CAPABILITIES,
+        PROCESS_INFORMATION, PSID, SE_FILE_OBJECT, SECURITY_CAPABILITIES, STARTUPINFOEXW,
+        STARTUPINFOW, SUB_CONTAINERS_AND_OBJECTS_INHERIT, SetEntriesInAclW, SetNamedSecurityInfoW,
+        TRUSTEE_IS_SID, TRUSTEE_IS_WELL_KNOWN_GROUP, TRUSTEE_W, UpdateProcThreadAttribute,
+        WAIT_OBJECT_0, WaitForSingleObject,
     };
 
     /// Parsed launcher CLI.
@@ -252,7 +253,7 @@ mod windows_main {
     // Per-path ACL grants
     // -------------------------------------------------------------------
 
-    fn grant_appcontainer_write(path: &PathBuf, sid: PSID) -> Result<(), String> {
+    fn grant_appcontainer_write(path: &Path, sid: PSID) -> Result<(), String> {
         let wide_path = to_wide_null(&path.display().to_string());
 
         let mut old_dacl: *mut core::ffi::c_void = ptr::null_mut();
@@ -290,14 +291,8 @@ mod windows_main {
             },
         };
         let mut new_dacl: *mut core::ffi::c_void = ptr::null_mut();
-        let set_rc = unsafe {
-            SetEntriesInAclW(
-                1,
-                &mut explicit as *mut _ as *mut core::ffi::c_void,
-                old_dacl,
-                &mut new_dacl,
-            )
-        };
+        let explicit_ptr = ptr::addr_of_mut!(explicit).cast::<core::ffi::c_void>();
+        let set_rc = unsafe { SetEntriesInAclW(1, explicit_ptr, old_dacl, &mut new_dacl) };
         if set_rc != 0 {
             return Err(format!("SetEntriesInAclW failed: {set_rc}"));
         }
@@ -364,13 +359,14 @@ mod windows_main {
             CapabilityCount: 0,
             Reserved: 0,
         };
+        let caps_ptr = ptr::addr_of_mut!(caps).cast::<core::ffi::c_void>();
         let upd_ok = unsafe {
             UpdateProcThreadAttribute(
                 attr_list,
                 0,
                 PROC_THREAD_ATTRIBUTE_SECURITY_CAPABILITIES,
-                &mut caps as *mut _ as *mut core::ffi::c_void,
-                core::mem::size_of::<SECURITY_CAPABILITIES>(),
+                caps_ptr,
+                size_of::<SECURITY_CAPABILITIES>(),
                 ptr::null_mut(),
                 ptr::null_mut(),
             )
@@ -384,7 +380,7 @@ mod windows_main {
             StartupInfo: zeroed_startupinfo(),
             lpAttributeList: attr_list,
         };
-        startup.StartupInfo.cb = core::mem::size_of::<STARTUPINFOEXW>() as DWORD;
+        startup.StartupInfo.cb = size_of::<STARTUPINFOEXW>() as DWORD;
         let mut cmdline = build_command_line(child_argv);
         let app_name = to_wide_null(child_argv[0].to_string_lossy().as_ref());
 
@@ -405,8 +401,8 @@ mod windows_main {
                 EXTENDED_STARTUPINFO_PRESENT,
                 ptr::null_mut(),
                 ptr::null(),
-                &mut startup as LPSTARTUPINFOEXW,
-                &mut proc_info as *mut PROCESS_INFORMATION,
+                &mut startup,
+                &mut proc_info,
             )
         };
         if spawned == 0 {
@@ -447,6 +443,7 @@ mod windows_main {
         }
     }
 
+    #[allow(clippy::missing_const_for_fn)]
     fn zeroed_startupinfo() -> STARTUPINFOW {
         // SAFETY: STARTUPINFOW is a POD struct (#[repr(C)], no Rust
         // invariants); all-zero is a valid representation that means
@@ -497,7 +494,7 @@ mod windows_main {
                         },
                         '"' => {
                             // 2N+1 backslashes, then the quote.
-                            for _ in 0..(2 * backslashes + 1) {
+                            for _ in 0..=(2 * backslashes) {
                                 joined.push('\\');
                             }
                             joined.push('"');

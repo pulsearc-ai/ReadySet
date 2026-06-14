@@ -166,7 +166,7 @@ pub struct SECURITY_CAPABILITIES {
 /// `_TRUSTEE_W` — identifies the principal in an `EXPLICIT_ACCESS_W` entry.
 #[repr(C)]
 pub struct TRUSTEE_W {
-    pub pMultipleTrustee: *mut TRUSTEE_W,
+    pub pMultipleTrustee: *mut Self,
     pub MultipleTrusteeOperation: MULTIPLE_TRUSTEE_OPERATION,
     pub TrusteeForm: TRUSTEE_FORM,
     pub TrusteeType: TRUSTEE_TYPE,

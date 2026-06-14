@@ -67,6 +67,7 @@ jobs:
           ajv validate --spec=draft2020 \
             -s docs/contracts/schemas/manifest.schema.json \
             -r docs/contracts/schemas/capability-descriptor.schema.json \
+            -r docs/contracts/schemas/command-alias.schema.json \
             -d /tmp/manifest-fixture.json
       - name: validate change-record fixture
         run: |

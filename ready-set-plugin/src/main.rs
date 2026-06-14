@@ -53,7 +53,7 @@ enum Commands {
 struct NewArgs {
     /// Plugin name, with or without the ready-set- prefix.
     name: String,
-    /// Output directory. Defaults to ./ready-set-<name>.
+    /// Output directory. Defaults to `./ready-set-NAME`.
     #[arg(long)]
     path: Option<PathBuf>,
     /// Generate a command-only plugin or a lifecycle provider.
@@ -83,7 +83,7 @@ struct NewArgs {
     /// Local ready-set-sdk path for generated Cargo.toml.
     #[arg(long)]
     sdk_path: Option<String>,
-    /// Also generate dist/ready-set-<name>.toml.
+    /// Also generate `dist/ready-set-NAME.toml`.
     #[arg(long)]
     sidecar: bool,
     /// Run cargo fmt --check and cargo test in the generated crate.
@@ -95,7 +95,7 @@ struct NewArgs {
 struct GenerateArgs {
     /// Path to ready-set-plugin.yaml.
     blueprint: PathBuf,
-    /// Output directory. Defaults to ./ready-set-<name>.
+    /// Output directory. Defaults to `./ready-set-NAME`.
     #[arg(long)]
     path: Option<PathBuf>,
     /// Overwrite generated files if they already exist.

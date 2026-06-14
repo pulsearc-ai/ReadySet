@@ -15,7 +15,7 @@
 //! launcher binary). Other targets fail to build until a backend exists.
 //!
 //! The Windows backend is the only code in this crate that uses
-//! `unsafe` (the Win32 FFI declarations in [`win_ffi`]). The workspace
+//! `unsafe` (the Win32 FFI declarations in `win_ffi.rs`). The workspace
 //! lint `unsafe_code = "deny"` blocks unsafe everywhere else by
 //! default; `win_ffi.rs` opts in with a file-scoped
 //! `#![allow(unsafe_code)]`.
