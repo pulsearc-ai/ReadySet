@@ -2,13 +2,16 @@
 
 First-party `ready-set` provider plugin for secrets management.
 
-Rotation spawns user-defined provider CLIs (Fly, wrangler, neon, gcloud, aws)
-and wraps each spawn in the host's sandbox to bound its filesystem write blast
-radius: `sandbox-exec` on macOS, `bubblewrap` (`bwrap`) on Linux, and an
-`AppContainer` launcher on Windows. The runtime requirement: `sandbox-exec`
-ships with macOS; install `bwrap` on Linux via `apt install bubblewrap`
-(Debian/Ubuntu) or `dnf install bubblewrap` (Fedora); install
-`ready-set-encrypt-launcher.exe` alongside `ready-set-encrypt.exe` on Windows.
+Rotation spawns user-defined secret manager or deployment CLIs such as `fly`,
+`neon`, `vercel`, `railway`, `render`, `netlify`, `heroku`, `wrangler`,
+`gcloud`, `aws`, `az`, `doctl`, `firebase`, `supabase`, `doppler`,
+`infisical`, `op`, `vault`, `gh`, or `kubectl`, and wraps each spawn in the
+host's sandbox to bound its filesystem write blast radius: `sandbox-exec` on
+macOS, `bubblewrap` (`bwrap`) on Linux, and an `AppContainer` launcher on
+Windows. The runtime requirement: `sandbox-exec` ships with macOS; install
+`bwrap` on Linux via `apt install bubblewrap` (Debian/Ubuntu) or `dnf install
+bubblewrap` (Fedora); install `ready-set-encrypt-launcher.exe` alongside
+`ready-set-encrypt.exe` on Windows.
 
 ## Rust API Boundary
 
@@ -97,30 +100,60 @@ environment = "local"
 schema_version = 1
 default_cadence_days = 90
 
-# Local random bytes + push to Fly:
+# Local random bytes + deployment hook:
 [secret.SESSION_SECRET]
 backend = "self-issued"
 cadence_days = 30
 target_path = "secrets/session-secret"
 deploy_commands = [
-  ["fly", "secrets", "set", "SESSION_SECRET={{value}}", "-a", "example-api"],
+  ["secretctl", "set", "SESSION_SECRET", "{{value}}", "--service", "example-api"],
 ]
 notes = "Invalidates active sessions; rotate during low-traffic windows"
 
-# Value from external command (Neon) + push to Fly:
+# Value from an external command + deployment hook:
 [secret.DATABASE_URL]
 backend = "exec"
-generate_command = ["neon", "connection-string", "main", "--branch", "production"]
+generate_command = ["dbctl", "connection-string", "production"]
 deploy_commands = [
-  ["fly", "secrets", "set", "DATABASE_URL={{value}}", "-a", "example-api"],
+  ["secretctl", "set", "DATABASE_URL", "{{value}}", "--service", "example-api"],
 ]
-sandbox_write_paths = ["~/.neon"]  # neon CLI maintains state outside the project
+sandbox_write_paths = ["~/.config/dbctl"]  # dbctl keeps auth state outside the project
 
 # Manual reminder only:
 [secret.OPENAI_API_KEY]
 backend = "manual"
 dashboard_url = "https://platform.openai.com/api-keys"
 ```
+
+Illustrative command shapes:
+
+| Provider style | Example argv |
+|----------------|--------------|
+| Fly.io | `["fly", "secrets", "set", "SESSION_SECRET={{value}}", "-a", "example-api"]` |
+| Neon | `["neon", "connection-string", "main", "--branch", "production"]` |
+| Vercel | `["scripts/rotate-vercel-env", "SESSION_SECRET", "{{value_path}}", "production"]` |
+| Railway | `["railway", "variables", "--set", "SESSION_SECRET={{value}}"]` |
+| Render | `["render", "services", "env", "set", "srv-example", "SESSION_SECRET={{value}}"]` |
+| Netlify | `["netlify", "env:set", "SESSION_SECRET", "{{value}}", "--context", "production"]` |
+| Heroku | `["heroku", "config:set", "SESSION_SECRET={{value}}", "--app", "example-api"]` |
+| Cloudflare Workers | `["scripts/rotate-wrangler-secret", "SESSION_SECRET", "{{value_path}}"]` |
+| Supabase | `["supabase", "secrets", "set", "SESSION_SECRET={{value}}", "--project-ref", "example"]` |
+| Firebase | `["scripts/rotate-firebase-secret", "SESSION_SECRET", "{{value_path}}"]` |
+| DigitalOcean Apps | `["scripts/rotate-doctl-secret", "SESSION_SECRET", "{{value_path}}"]` |
+| AWS Secrets Manager | `["aws", "secretsmanager", "put-secret-value", "--secret-id", "example/session", "--secret-string", "{{value}}"]` |
+| GCP Secret Manager | `["gcloud", "secrets", "versions", "add", "SESSION_SECRET", "--data-file", "{{value_path}}"]` |
+| Azure Key Vault | `["az", "keyvault", "secret", "set", "--vault-name", "example-vault", "--name", "SESSION_SECRET", "--value", "{{value}}"]` |
+| Kubernetes | `["scripts/rotate-kubernetes-secret", "app-secrets", "SESSION_SECRET", "{{value_path}}"]` |
+| Doppler | `["doppler", "secrets", "set", "SESSION_SECRET={{value}}", "--project", "example", "--config", "prod"]` |
+| Infisical | `["infisical", "secrets", "set", "SESSION_SECRET={{value}}", "--env", "prod", "--path", "/"]` |
+| 1Password | `["op", "item", "edit", "Example App", "SESSION_SECRET[password]={{value}}"]` |
+| Vault | `["vault", "kv", "put", "secret/example", "SESSION_SECRET={{value}}"]` |
+| GitHub Actions | `["gh", "secret", "set", "SESSION_SECRET", "--body", "{{value}}", "--repo", "owner/repo"]` |
+
+These are examples, not bundled adapters. `ready-set-encrypt` only executes the
+argv arrays you put in the manifest. When a provider CLI requires stdin,
+multiple commands, or interactive setup, put that logic in a project-local
+script and call the script from `deploy_commands`.
 
 Per-secret fields:
 
@@ -134,10 +167,23 @@ Per-secret fields:
 | `notes` | no | all | Free-form human note (rotation caveats, runbook link) |
 | `generate_command` | **yes** for `exec` | exec | argv array; stdout (trimmed) becomes the new value |
 | `deploy_commands` | no | self-issued, exec | Sequential argv arrays run after the value is in hand. Fail-fast: first non-zero exit halts the rest. Supports `{{value}}` and `{{value_path}}` substitution inside elements |
-| `sandbox_write_paths` | no | all | Extra `(subpath ...)` entries added to the sandbox write allowlist. `~` expanded. Use for tools with state dirs outside the project (e.g. `~/.fly`, `~/.neon`) |
+| `sandbox_write_paths` | no | all | Extra `(subpath ...)` entries added to the sandbox write allowlist. `~` expanded. Use for tools with state dirs outside the project (e.g. `~/.fly`, `~/.config/neon`, `~/.config/gcloud`, `~/.config/op`, `~/.kube`) |
 | `unsandboxed` | no | all | When `true`, skip the platform sandbox wrap. Reserved for genuinely problematic tools; recorded as `sandboxed: false` in the audit log |
 
 Recommended: keep `target_path` values under `secrets/` so the existing managed `.gitignore` block covers them. Substitution happens inside argv *elements only* — never through a shell — so `{{value}}` substitution cannot inject shell metacharacters.
+
+Common state-dir examples for `sandbox_write_paths`:
+
+| CLI family | Example paths |
+|------------|---------------|
+| Fly.io / Neon / Vercel / Railway | `~/.fly`, `~/.config/neon`, `~/.config/com.vercel.cli`, `~/.railway`, `~/.config/railway` |
+| Netlify / Heroku / Render | `~/.config/netlify`, `~/.netrc`, `~/.cache/heroku`, `~/.config/render` |
+| AWS / GCP / Azure / DigitalOcean | `~/.aws`, `~/.config/gcloud`, `~/.azure`, `~/.config/doctl` |
+| Cloudflare / Firebase / Supabase | `~/.wrangler`, `~/.config/.wrangler`, `~/.config/configstore`, `~/.supabase` |
+| Kubernetes / Helm | `~/.kube`, `~/.config/helm` |
+| 1Password / Vault / Doppler / Infisical | `~/.config/op`, `~/.vault-token`, `~/.doppler`, `~/.infisical` |
+
+Only add paths your chosen CLI actually needs.
 
 ### Audit log format
 
@@ -156,7 +202,7 @@ Recommended: keep `target_path` values under `secrets/` so the existing managed 
 |---------|----------|
 | `self-issued` | Generates 32 random bytes via `getrandom`, hex-encodes (64 chars). If `target_path` set, writes via `atomic_write` + `restrict_to_user(0600)`. If `deploy_commands` set, runs them (sandboxed) after the local write. If neither set, prints the value to stdout once with the SHA. |
 | `exec` | Runs `generate_command` (sandboxed); its trimmed stdout becomes the new value. Then writes `target_path` (if set) and runs `deploy_commands` (sandboxed, sequential fail-fast). |
-| `manual` | Prints reminder + `dashboard_url` (if present). No filesystem mutation, no commands run. Used for provider keys without a rotation API (OpenAI, Anthropic, Resend, etc.). |
+| `manual` | Prints reminder + `dashboard_url` (if present). No filesystem mutation, no commands run. Used for provider keys without a rotation API (OpenAI, Anthropic, Stripe, SendGrid, Resend, etc.). |
 
 ### Sandbox model
 
@@ -196,7 +242,7 @@ On macOS, commands are wrapped in `sandbox-exec` with a generated profile:
 | Buggy CLI accidentally writes to `~/.bashrc` | Yes — same |
 | Manifest contains `["rm", "-rf", "<HOME>"]` | Yes — only allowlisted paths are writeable |
 | Provider CLI exfiltrates `{{value_path}}` over HTTPS | **No** — network is allowed |
-| Provider CLI reads `~/.aws/credentials` and uploads it | **No** — file-read is universally allowed |
+| Provider CLI reads `~/.aws/credentials`, `~/.kube/config`, or unrelated tool credentials and uploads them | **No** — file-read is universally allowed |
 
 Read-side exfiltration is out of scope (would require egress filtering). The mitigations are write-side blast-radius bounds.
 
@@ -237,7 +283,7 @@ The planned `ready-set undo` will not roll back a rotation. The audit log is the
 This plugin writes (only via `set`):
 
 - `.env.example` — alpha-sorted detected vars in a managed block; user-pinned keys above the block are preserved verbatim.
-- `deploy/secrets/canonical.env.template` — alpha-sorted canonical inventory with fake values only. Use it as a checklist for ReadySet bundles, 1Password, Keychain, Fly, or Cloudflare; never paste real values into this file.
+- `deploy/secrets/canonical.env.template` — alpha-sorted canonical inventory with fake values only. Use it as a checklist for ReadySet bundles, 1Password, Keychain, Vault, Doppler, Infisical, cloud provider dashboards, or provider CLIs; never paste real values into this file.
 - `.gitignore` — appends a `# >>> ready-set-encrypt managed >>>` block. Uses **namespaced** markers that do not collide with `ready-set-rust`'s generic `# >>> ready-set managed >>>` block.
 - `.gitleaks.toml` — bundled defaults complementing gitleaks' upstream rules. `--force` required to overwrite a divergent file.
 - `.ready-set/plugins/secrets/manifest.toml` — rotation manifest. First run creates it with `backend = "manual"` for every detected env var; subsequent runs additively reconcile (append new env vars, never remove user entries; preserve comments via `toml_edit`).
@@ -411,7 +457,7 @@ drop; tests must not write fixed files under `$HOME`.
 
 - **Egress filtering / network policy.** Profile leaves `(allow network*)`. Read-side exfiltration via HTTPS is not mitigated.
 - **`sandbox-exec` → libSandbox FFI migration.** Defensive; only if Apple removes the tool from a future macOS release.
-- **First-party native backends** (Neon REST, Cloudflare API). Use `exec` for these — that's the whole point.
+- **First-party native provider backends** (Neon REST, Fly Machines API, Cloudflare API, Vercel API, Railway API, Render API, Netlify API, Heroku Platform API, AWS Secrets Manager, GCP Secret Manager, Azure Key Vault, Vault, Doppler, Infisical, 1Password Connect, GitHub Actions secrets). Use `exec` for these — that's the whole point.
 - **Rollback-on-deploy-failure.** Sequential fail-fast; partial deploys are surfaced via the audit log.
 
 ## License

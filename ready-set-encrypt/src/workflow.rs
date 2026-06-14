@@ -759,9 +759,17 @@ fn builtin_rules() -> Vec<(&'static str, Regex)> {
         ),
         ("fly-io-token", r"FlyV1 [A-Za-z0-9+/=_\-]{40,}"),
         ("cloudflare-api-token", r"cfut_[A-Za-z0-9_\-]{30,}"),
+        ("github-classic-token", r"gh[pousr]_[A-Za-z0-9_]{36,}"),
+        ("github-fine-grained-token", r"github_pat_[A-Za-z0-9_]{40,}"),
+        ("google-api-key", r"AIza[0-9A-Za-z_\-]{35}"),
         ("slack-token", r"xox[ep](?:-[A-Za-z0-9]+){2,}"),
         ("slack-app-token", r"xapp-1-[A-Z0-9]+-[0-9]+-[A-Za-z0-9]+"),
         ("resend-api-key", r"re_[A-Za-z0-9]{8}_[A-Za-z0-9]{20,}"),
+        (
+            "sendgrid-api-key",
+            r"SG\.[A-Za-z0-9_\-]{16,}\.[A-Za-z0-9_\-]{16,}",
+        ),
+        ("stripe-secret-key", r"[rs]k_(?:live|test)_[A-Za-z0-9]{24,}"),
         ("aws-access-key", r"AKIA[0-9A-Z]{16}"),
         (
             "pem-block",

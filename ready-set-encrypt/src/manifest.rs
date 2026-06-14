@@ -86,7 +86,8 @@ pub struct SecretEntry {
     pub deploy_commands: Option<Vec<Vec<String>>>,
     /// Extra paths to add to the sandbox's allow-write list. `~` expanded.
     /// Use for provider CLIs that maintain state outside the project (e.g.
-    /// `~/.fly`). Document the reason in `notes`.
+    /// `~/.fly`, `~/.config/neon`, `~/.config/gcloud`, `~/.azure`,
+    /// `~/.config/op`, or `~/.kube`). Document the reason in `notes`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sandbox_write_paths: Option<Vec<String>>,
     /// When `true`, skip the macOS sandbox wrap for this secret's commands.

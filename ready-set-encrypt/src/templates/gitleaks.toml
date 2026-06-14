@@ -32,6 +32,24 @@ regex       = '''cfut_[A-Za-z0-9_\-]{30,}'''
 tags        = ["token", "cloudflare"]
 
 [[rules]]
+id          = "github-classic-token"
+description = "GitHub classic personal access token"
+regex       = '''gh[pousr]_[A-Za-z0-9_]{36,}'''
+tags        = ["token", "github"]
+
+[[rules]]
+id          = "github-fine-grained-token"
+description = "GitHub fine-grained personal access token"
+regex       = '''github_pat_[A-Za-z0-9_]{40,}'''
+tags        = ["token", "github"]
+
+[[rules]]
+id          = "google-api-key"
+description = "Google API key"
+regex       = '''AIza[0-9A-Za-z_\-]{35}'''
+tags        = ["key", "google"]
+
+[[rules]]
 id          = "slack-token-xoxe"
 description = "Slack OAuth refresh / user token"
 regex       = '''xox[ep](?:-[A-Za-z0-9]+){2,}'''
@@ -48,6 +66,18 @@ id          = "resend-api-key"
 description = "Resend API key"
 regex       = '''re_[A-Za-z0-9]{8}_[A-Za-z0-9]{20,}'''
 tags        = ["key", "resend"]
+
+[[rules]]
+id          = "sendgrid-api-key"
+description = "SendGrid API key"
+regex       = '''SG\.[A-Za-z0-9_\-]{16,}\.[A-Za-z0-9_\-]{16,}'''
+tags        = ["key", "sendgrid"]
+
+[[rules]]
+id          = "stripe-secret-key"
+description = "Stripe secret or restricted key"
+regex       = '''[rs]k_(?:live|test)_[A-Za-z0-9]{24,}'''
+tags        = ["key", "stripe"]
 
 [allowlist]
 description = "Common safe substrings"

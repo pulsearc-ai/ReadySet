@@ -365,13 +365,14 @@ mod tests_macos {
 
     #[test]
     fn render_includes_extra_write_paths_with_tilde_expansion() {
-        let cfg = config_with_extras(vec!["~/.fly", "/opt/state"]);
+        let cfg = config_with_extras(vec!["~/.fly", "~/.config/neon", "/opt/state"]);
         let rendered = render_profile(&cfg);
         let home = home_dir().display().to_string();
         assert!(
             rendered.contains(&format!("(subpath \"{home}/.fly\")")),
             "expected ~ expansion, got: {rendered}"
         );
+        assert!(rendered.contains(&format!("(subpath \"{home}/.config/neon\")")));
         assert!(rendered.contains("(subpath \"/opt/state\")"));
     }
 
@@ -446,10 +447,10 @@ mod tests_linux {
 
     #[test]
     fn render_bwrap_args_expands_tilde_in_extras() {
-        let cfg = config_with_extras(vec!["~/.fly"]);
+        let cfg = config_with_extras(vec!["~/.config/neon"]);
         let argv = render_bwrap_args(&cfg);
         let home = home_dir().display().to_string();
-        let expected = format!("{home}/.fly");
+        let expected = format!("{home}/.config/neon");
         assert!(
             argv.windows(3)
                 .any(|w| w[0] == "--bind" && w[1] == expected && w[2] == expected),
